@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('product_tax_affinity', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('product_id');
+
+            $table->tinyInteger('gst_enabled')->default(0);
+            $table->enum('gst_type', ['inclusive', 'exclusive'])->default('exclusive');
+            $table->decimal('gst_percent', 5, 2)->default(0.00);
+
+            $table->tinyInteger('affinity_enabled')->default(0);
+            $table->decimal('affinity_percent', 5, 2)->default(0.00);
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('product_tax_affinity');
+    }
+};

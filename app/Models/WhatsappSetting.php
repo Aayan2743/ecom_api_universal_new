@@ -1,0 +1,13 @@
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class WhatsappSetting extends Model
+{
+    protected $table = 'whatsapp_settings';
+
+    protected $fillable = [
+        'api_key',
+    ];
+}

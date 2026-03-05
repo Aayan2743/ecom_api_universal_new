@@ -1,0 +1,5238 @@
+name: Endpoints
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/documentation
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Handles the API request and renders the Swagger documentation view.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 500
+        content: '{"success":false,"error":"SERVER_ERROR","message":"Route [l5-swagger.default.docs] not defined."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/oauth2-callback
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Handles the OAuth2 callback and retrieves the required file for the redirect.'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |
+          <!doctype html>
+          <html lang="en-US">
+          <body>
+          <script src="oauth2-redirect.js"></script>
+          </body>
+          </html>
+        headers:
+          content-type: 'text/html; charset=utf-8'
+          cache-control: 'no-cache, private'
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/auth/app-logo-settings
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"success":true,"data":{"id":1,"app_name":"Hamsini-Silks","app_logo":"settings\/c79651c9-a33b-4e7c-b1f1-30893ee1f11e.webp","app_favicon":"settings\/6f432dfb-f718-4a89-b00e-bcd255216a1a.webp","created_at":"2026-02-03T07:03:27.000000Z","updated_at":"2026-02-07T12:07:50.000000Z","app_logo_url":"http:\/\/localhost\/storage\/settings\/c79651c9-a33b-4e7c-b1f1-30893ee1f11e.webp","app_favicon_url":"http:\/\/localhost\/storage\/settings\/6f432dfb-f718-4a89-b00e-bcd255216a1a.webp"}}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/app-logo-settings
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/app-logo-settings
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      app_name:
+        custom: []
+        name: app_name
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      app_logo:
+        custom: []
+        name: app_logo
+        description: 'Must be an image.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      app_favicon:
+        custom: []
+        name: app_favicon
+        description: 'Must be an image.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      app_name: vmqeopfuudtdsufvyvddq
+    fileParameters:
+      app_logo: null
+      app_favicon: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/social-media-settings
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/social-media-settings
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Create or Update Social Media Settings (single row)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      linkedin:
+        custom: []
+        name: linkedin
+        description: 'Must be a valid URL.'
+        required: false
+        example: 'http://kunze.biz/iste-laborum-eius-est-dolor.html'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      dribbble:
+        custom: []
+        name: dribbble
+        description: 'Must be a valid URL.'
+        required: false
+        example: 'http://reynolds.com/'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      instagram:
+        custom: []
+        name: instagram
+        description: 'Must be a valid URL.'
+        required: false
+        example: 'http://schmeler.com/a-quo-sed-fugit-facilis-perferendis-dolores-molestias'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      twitter:
+        custom: []
+        name: twitter
+        description: 'Must be a valid URL.'
+        required: false
+        example: 'http://www.harber.com/fuga-aspernatur-natus-earum-quas'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      youtube:
+        custom: []
+        name: youtube
+        description: 'Must be a valid URL.'
+        required: false
+        example: 'https://www.ankunding.org/nostrum-quia-possimus-rerum-id'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      linkedin: 'http://kunze.biz/iste-laborum-eius-est-dolor.html'
+      dribbble: 'http://reynolds.com/'
+      instagram: 'http://schmeler.com/a-quo-sed-fugit-facilis-perferendis-dolores-molestias'
+      twitter: 'http://www.harber.com/fuga-aspernatur-natus-earum-quas'
+      youtube: 'https://www.ankunding.org/nostrum-quia-possimus-rerum-id'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/payment-gateways
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/payment-gateways
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'CREATE or UPDATE (single row)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      razorpay_key:
+        custom: []
+        name: razorpay_key
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      razorpay_secret:
+        custom: []
+        name: razorpay_secret
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      razorpay_enabled:
+        custom: []
+        name: razorpay_enabled
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      cashfree_app_id:
+        custom: []
+        name: cashfree_app_id
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      cashfree_secret:
+        custom: []
+        name: cashfree_secret
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      cashfree_enabled:
+        custom: []
+        name: cashfree_enabled
+        description: ''
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      phonepe_merchant_id:
+        custom: []
+        name: phonepe_merchant_id
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      phonepe_secret:
+        custom: []
+        name: phonepe_secret
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      phonepe_enabled:
+        custom: []
+        name: phonepe_enabled
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      cod_enabled:
+        custom: []
+        name: cod_enabled
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      razorpay_key: consequatur
+      razorpay_secret: consequatur
+      razorpay_enabled: true
+      cashfree_app_id: consequatur
+      cashfree_secret: consequatur
+      cashfree_enabled: false
+      phonepe_merchant_id: consequatur
+      phonepe_secret: consequatur
+      phonepe_enabled: true
+      cod_enabled: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: api/admin-dashboard/payment-gateways
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'DELETE settings (optional)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/get-variations
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/add-variation
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      type:
+        custom: []
+        name: type
+        description: ''
+        required: true
+        example: color
+        type: string
+        enumValues:
+          - text
+          - color
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      type: color
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/admin-dashboard/update-variations/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the update variation.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      type:
+        custom: []
+        name: type
+        description: ''
+        required: true
+        example: text
+        type: string
+        enumValues:
+          - text
+          - color
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      type: text
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/admin-dashboard/delete-variations/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the delete variation.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/add-variation-value/{variationId}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      variationId:
+        custom: []
+        name: variationId
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      variationId: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      value:
+        custom: []
+        name: value
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      color_code:
+        custom: []
+        name: color_code
+        description: 'Must not be greater than 50 characters.'
+        required: false
+        example: amniihfqcoynlazghdtqt
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      value: vmqeopfuudtdsufvyvddq
+      color_code: amniihfqcoynlazghdtqt
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/admin-dashboard/update-variation-value/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the update variation value.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      value:
+        custom: []
+        name: value
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      color_code:
+        custom: []
+        name: color_code
+        description: 'Must not be greater than 50 characters.'
+        required: false
+        example: amniihfqcoynlazghdtqt
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      value: vmqeopfuudtdsufvyvddq
+      color_code: amniihfqcoynlazghdtqt
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/admin-dashboard/delete-variation-value/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the delete variation value.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/whatsapp-settings
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/whatsapp-settings
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'SAVE (create or update)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      api_key:
+        custom: []
+        name: api_key
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      api_key: vmqeopfuudtdsufvyvddq
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/cart/list-coupon
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/cart/create-coupon
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      code:
+        custom: []
+        name: code
+        description: 'Must not be greater than 50 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      type:
+        custom: []
+        name: type
+        description: ''
+        required: true
+        example: percent
+        type: string
+        enumValues:
+          - percent
+          - flat
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      value:
+        custom: []
+        name: value
+        description: 'Must be at least 0.'
+        required: true
+        example: 1
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      min_order:
+        custom: []
+        name: min_order
+        description: 'Must be at least 0.'
+        required: true
+        example: 45
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      max_discount:
+        custom: []
+        name: max_discount
+        description: 'Must be at least 0.'
+        required: false
+        example: 46
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      expiry_date:
+        custom: []
+        name: expiry_date
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-02-09T13:23:43'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      is_active:
+        custom: []
+        name: is_active
+        description: ''
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      code: vmqeopfuudtdsufvyvddq
+      type: percent
+      value: 1
+      min_order: 45
+      max_discount: 46
+      expiry_date: '2026-02-09T13:23:43'
+      is_active: false
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/admin-dashboard/cart/update-coupon/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the update coupon.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      code:
+        custom: []
+        name: code
+        description: ''
+        required: false
+        example: null
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      type:
+        custom: []
+        name: type
+        description: ''
+        required: true
+        example: percent
+        type: string
+        enumValues:
+          - percent
+          - flat
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      value:
+        custom: []
+        name: value
+        description: 'Must be at least 0.'
+        required: true
+        example: 73
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      min_order:
+        custom: []
+        name: min_order
+        description: 'Must be at least 0.'
+        required: true
+        example: 45
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      max_discount:
+        custom: []
+        name: max_discount
+        description: 'Must be at least 0.'
+        required: false
+        example: 56
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      expiry_date:
+        custom: []
+        name: expiry_date
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-02-09T13:23:43'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      is_active:
+        custom: []
+        name: is_active
+        description: ''
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      type: percent
+      value: 73
+      min_order: 45
+      max_discount: 56
+      expiry_date: '2026-02-09T13:23:43'
+      is_active: true
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/admin-dashboard/cart/delete-coupon/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the delete coupon.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/list-category
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/list-category-all
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/add-category
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      parent_id:
+        custom: []
+        name: parent_id
+        description: 'The <code>id</code> of an existing record in the categories table.'
+        required: false
+        example: null
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      image:
+        custom: []
+        name: image
+        description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+    fileParameters:
+      image: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/update-category/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the update category.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      parent_id:
+        custom: []
+        name: parent_id
+        description: ''
+        required: false
+        example: null
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      image:
+        custom: []
+        name: image
+        description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+    fileParameters:
+      image: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/admin-dashboard/delete-category/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the delete category.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/list-brand
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/add-brand
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      image:
+        custom: []
+        name: image
+        description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: true
+        example: active
+        type: string
+        enumValues:
+          - active
+          - inactive
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      status: active
+    fileParameters:
+      image: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/update-brand/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the update brand.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      image:
+        custom: []
+        name: image
+        description: 'Must be an image. Must not be greater than 2048 kilobytes.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: true
+        example: active
+        type: string
+        enumValues:
+          - active
+          - inactive
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      status: active
+    fileParameters:
+      image: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/admin-dashboard/delete-brand/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the delete brand.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/products
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/admin-dashboard/product/fetch-products-by-id/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the fetch products by id.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/create-product
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      category_id:
+        custom: []
+        name: category_id
+        description: 'The <code>id</code> of an existing record in the categories table.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      brand_id:
+        custom: []
+        name: brand_id
+        description: 'The <code>id</code> of an existing record in the brands table.'
+        required: false
+        example: null
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: ''
+        required: true
+        example: 'Dolores dolorum amet iste laborum eius est dolor.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      purchase_price:
+        custom: []
+        name: purchase_price
+        description: 'Must be at least 0.'
+        required: false
+        example: 12
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      base_price:
+        custom: []
+        name: base_price
+        description: 'Must be at least 0.'
+        required: false
+        example: 66
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      discount:
+        custom: []
+        name: discount
+        description: 'Must be at least 0.'
+        required: false
+        example: 13
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: false
+        example: draft
+        type: string
+        enumValues:
+          - draft
+          - active
+          - inactive
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      category_id: consequatur
+      description: 'Dolores dolorum amet iste laborum eius est dolor.'
+      purchase_price: 12
+      base_price: 66
+      discount: 13
+      status: draft
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/update-product/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the update product.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      category_id:
+        custom: []
+        name: category_id
+        description: 'The <code>id</code> of an existing record in the categories table.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      brand_id:
+        custom: []
+        name: brand_id
+        description: 'The <code>id</code> of an existing record in the brands table.'
+        required: false
+        example: null
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: ''
+        required: true
+        example: 'Dolores dolorum amet iste laborum eius est dolor.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      purchase_price:
+        custom: []
+        name: purchase_price
+        description: 'Must be at least 0.'
+        required: false
+        example: 12
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      base_price:
+        custom: []
+        name: base_price
+        description: 'Must be at least 0.'
+        required: false
+        example: 66
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      discount:
+        custom: []
+        name: discount
+        description: 'Must be at least 0.'
+        required: false
+        example: 13
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: false
+        example: active
+        type: string
+        enumValues:
+          - draft
+          - active
+          - inactive
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      category_id: consequatur
+      description: 'Dolores dolorum amet iste laborum eius est dolor.'
+      purchase_price: 12
+      base_price: 66
+      discount: 13
+      status: active
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/admin-dashboard/delete-product/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the delete product.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/admin-dashboard/product/bulk-upload
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      file:
+        custom: []
+        name: file
+        description: 'Must be a file.'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters:
+      file: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product/{product_id}/gallery'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The ID of the product.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      images:
+        custom: []
+        name: images
+        description: 'Must be an image. Must not be greater than 5120 kilobytes.'
+        required: false
+        example:
+          - null
+        type: 'file[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      main_index:
+        custom: []
+        name: main_index
+        description: 'Must be at least 0.'
+        required: false
+        example: 73
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      video_urls:
+        custom: []
+        name: video_urls
+        description: 'Must be a valid URL.'
+        required: true
+        example:
+          - 'https://www.mueller.com/laborum-eius-est-dolor-dolores-minus-voluptatem'
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      main_index: 73
+      video_urls:
+        - 'https://www.mueller.com/laborum-eius-est-dolor-dolores-minus-voluptatem'
+    fileParameters:
+      images:
+        - null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product/{product_id}/images'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The ID of the product.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      images:
+        custom: []
+        name: images
+        description: 'Must be an image. Must not be greater than 5120 kilobytes.'
+        required: false
+        example:
+          - null
+        type: 'file[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters: []
+    fileParameters:
+      images:
+        - null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/admin-dashboard/product/image/{image_id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      image_id:
+        custom: []
+        name: image_id
+        description: 'The ID of the image.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      image_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product/{product_id}/set-main-image'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The ID of the product.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      image_id:
+        custom: []
+        name: image_id
+        description: 'The <code>id</code> of an existing record in the product_images table.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      image_id: consequatur
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product/{product_id}/videos'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The ID of the product.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      video_urls:
+        custom: []
+        name: video_urls
+        description: 'Must be a valid URL.'
+        required: true
+        example:
+          - 'http://kunze.biz/iste-laborum-eius-est-dolor.html'
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      video_urls:
+        - 'http://kunze.biz/iste-laborum-eius-est-dolor.html'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product/create-variation/{product_id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The ID of the product.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      variants:
+        custom: []
+        name: variants
+        description: 'Must have at least 1 items.'
+        required: true
+        example:
+          - []
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      variant_images:
+        custom: []
+        name: variant_images
+        description: 'Must be an image. Must not be greater than 5120 kilobytes.'
+        required: false
+        example:
+          -
+            - null
+        type: 'file[][]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'variants[].variation_value_ids':
+        custom: []
+        name: 'variants[].variation_value_ids'
+        description: 'Must have at least 1 items.'
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'variants[].sku':
+        custom: []
+        name: 'variants[].sku'
+        description: 'Must not be greater than 100 characters.'
+        required: false
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].purchase_price':
+        custom: []
+        name: 'variants[].purchase_price'
+        description: 'Must be at least 0.'
+        required: false
+        example: 1
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].extra_price':
+        custom: []
+        name: 'variants[].extra_price'
+        description: 'Must be at least 0.'
+        required: false
+        example: 45
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].quantity':
+        custom: []
+        name: 'variants[].quantity'
+        description: 'Must be at least 0.'
+        required: false
+        example: 46
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].low_quantity':
+        custom: []
+        name: 'variants[].low_quantity'
+        description: 'Must be at least 0.'
+        required: false
+        example: 28
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      variants:
+        -
+          variation_value_ids: []
+          sku: vmqeopfuudtdsufvyvddq
+          purchase_price: 1
+          extra_price: 45
+          quantity: 46
+          low_quantity: 28
+    fileParameters:
+      variant_images:
+        -
+          - null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product/update-variation/{product_id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The ID of the product.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      variants:
+        custom: []
+        name: variants
+        description: ''
+        required: true
+        example:
+          - []
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'variants[].id':
+        custom: []
+        name: 'variants[].id'
+        description: 'The <code>id</code> of an existing record in the product_variant_combinations table.'
+        required: false
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].variation_value_ids':
+        custom: []
+        name: 'variants[].variation_value_ids'
+        description: ''
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'variants[].sku':
+        custom: []
+        name: 'variants[].sku'
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].purchase_price':
+        custom: []
+        name: 'variants[].purchase_price'
+        description: 'Must be at least 0.'
+        required: false
+        example: 1
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].extra_price':
+        custom: []
+        name: 'variants[].extra_price'
+        description: 'Must be at least 0.'
+        required: false
+        example: 45
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].discount':
+        custom: []
+        name: 'variants[].discount'
+        description: 'Must be at least 0.'
+        required: false
+        example: 46
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].quantity':
+        custom: []
+        name: 'variants[].quantity'
+        description: 'Must be at least 0.'
+        required: false
+        example: 28
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].low_quantity':
+        custom: []
+        name: 'variants[].low_quantity'
+        description: 'Must be at least 0.'
+        required: false
+        example: 30
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      'variants[].keep_image_ids':
+        custom: []
+        name: 'variants[].keep_image_ids'
+        description: 'The <code>id</code> of an existing record in the product_variant_images table.'
+        required: false
+        example:
+          - 17
+        type: 'integer[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'variants[].images':
+        custom: []
+        name: 'variants[].images'
+        description: 'Must be an image. Must not be greater than 5120 kilobytes.'
+        required: false
+        example:
+          - null
+        type: 'file[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      variants:
+        -
+          id: 17
+          variation_value_ids: []
+          sku: vmqeopfuudtdsufvyvddq
+          purchase_price: 1
+          extra_price: 45
+          discount: 46
+          quantity: 28
+          low_quantity: 30
+          keep_image_ids:
+            - 17
+    fileParameters:
+      variants:
+        -
+          images:
+            - null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product-seo-meta/{product_id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The ID of the product.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      meta_title:
+        custom: []
+        name: meta_title
+        description: 'Must not be greater than 60 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      meta_description:
+        custom: []
+        name: meta_description
+        description: 'Must not be greater than 160 characters.'
+        required: true
+        example: amniihfqcoynlazghdtqt
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      meta_tags:
+        custom: []
+        name: meta_tags
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      meta_title: vmqeopfuudtdsufvyvddq
+      meta_description: amniihfqcoynlazghdtqt
+      meta_tags: consequatur
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product-seo-meta/update-meta/{product}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      product:
+        custom: []
+        name: product
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      meta_title:
+        custom: []
+        name: meta_title
+        description: 'Must not be greater than 60 characters.'
+        required: false
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      meta_description:
+        custom: []
+        name: meta_description
+        description: 'Must not be greater than 160 characters.'
+        required: false
+        example: amniihfqcoynlazghdtqt
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      meta_tags:
+        custom: []
+        name: meta_tags
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      meta_title: vmqeopfuudtdsufvyvddq
+      meta_description: amniihfqcoynlazghdtqt
+      meta_tags: consequatur
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product-tax-affinity/{product_id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The ID of the product.'
+        required: true
+        example: 13
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product_id: 13
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      gst_enabled:
+        custom: []
+        name: gst_enabled
+        description: ''
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      gst_type:
+        custom: []
+        name: gst_type
+        description: ''
+        required: false
+        example: exclusive
+        type: string
+        enumValues:
+          - inclusive
+          - exclusive
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      gst_percent:
+        custom: []
+        name: gst_percent
+        description: 'Must be at least 0. Must not be greater than 100.'
+        required: false
+        example: 21
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      affinity_enabled:
+        custom: []
+        name: affinity_enabled
+        description: ''
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      affinity_percent:
+        custom: []
+        name: affinity_percent
+        description: 'Must be at least 0. Must not be greater than 100.'
+        required: false
+        example: 13
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      gst_enabled: true
+      gst_type: exclusive
+      gst_percent: 21
+      affinity_enabled: true
+      affinity_percent: 13
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/product-tax-affinity/update-tax/{product}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      product:
+        custom: []
+        name: product
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      product: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      gst_enabled:
+        custom: []
+        name: gst_enabled
+        description: ''
+        required: true
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      gst_type:
+        custom: []
+        name: gst_type
+        description: 'This field is required when <code>gst_enabled</code> is <code>true</code>.'
+        required: false
+        example: exclusive
+        type: string
+        enumValues:
+          - inclusive
+          - exclusive
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      gst_percent:
+        custom: []
+        name: gst_percent
+        description: 'Must be at least 0. Must not be greater than 100.'
+        required: false
+        example: 21
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      affinity_enabled:
+        custom: []
+        name: affinity_enabled
+        description: ''
+        required: true
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      affinity_percent:
+        custom: []
+        name: affinity_percent
+        description: 'Must be at least 0. Must not be greater than 100.'
+        required: false
+        example: 13
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: true
+        example: Published
+        type: string
+        enumValues:
+          - Published
+          - draft
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      gst_enabled: true
+      gst_type: exclusive
+      gst_percent: 21
+      affinity_enabled: false
+      affinity_percent: 13
+      status: Published
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/publish-product/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the publish product.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/admin-dashboard/orders
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/admin-dashboard/orders-details/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the orders detail.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/admin-dashboard/orders/{id}/status'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the order.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      tracking_id:
+        custom: []
+        name: tracking_id
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      status: consequatur
+      tracking_id: consequatur
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/ecom/menu
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '[{"key":"silk-sarees","label":"Silk Sarees","items":["Banarasi Silk","Kanchipuram Jacquard","Kanchipuram Traditional","Soft Silks"]},{"key":"silk-sarees-casual","label":"Silk Sarees Casual","items":["Chiniya Silk","Georgette Sarees","Kadhi Tussar Silk"]},{"key":"silk-cotton","label":"Silk Cotton","items":["Chanderi Silk Cotton","Patola Silk Cotton"]},{"key":"fancy-sarees","label":"Fancy Sarees","items":["Assam Sarees","Banarasi Sarees","Kota Sarees"]},{"key":"cotton-sarees","label":"Cotton Sarees","items":["Bengal Cotton","Ikkat Cotton","Kanchi Cotton"]},{"key":"materials","label":"Materials","items":["Dress Materials","Running Materials"]},{"key":"rrrrrr","label":"rrrrrr","items":[]},{"key":"dell","label":"dell","items":["deel1"]}]'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/ecom/products
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"success":true,"data":{"current_page":1,"data":[{"id":13,"name":"Peacock Blue Patola Silk Cotton Saree","slug":"peacock-blue-patola-silk-cotton-saree","category_id":17,"brand_id":null,"description":"\ud83d\ude9a Free Shipping Domestic Free standard shipping on orders over 10,000 INR\n\ud83d\udd12 This site has implemented secure payment protocols to protect your financial information\n\u26a0\ufe0f Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.","purchase_price":null,"base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T09:46:09.000000Z","updated_at":"2026-02-04T10:07:43.000000Z","category":{"id":17,"name":"Kanchipuram Traditional","slug":"kanchipuram-traditional","parent_id":9},"images":[{"id":13,"product_id":13,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/ed6c6e97-970f-47a8-98be-bf8f0910dd69.webp"}],"videos":[{"id":17,"product_id":13,"video_url":"http:\/\/localhost:5173\/products"}],"variant_combinations":[{"id":11,"product_id":13,"sku":"9JSR058100","purchase_price":"4510.00","extra_price":"4410.00","discount":"10.00","quantity":100,"low_quantity":1,"created_at":"2026-02-04T09:47:35.000000Z","updated_at":"2026-02-04T09:47:35.000000Z","amount":4400,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":11,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]}]},{"id":14,"name":"Soft Silk Saree2","slug":"soft-silk-saree2","category_id":15,"brand_id":null,"description":"\ud83d\ude9a Free Shipping Domestic Free standard shipping on orders over 10,000 INR\n\ud83d\udd12 This site has implemented secure payment protocols to protect your financial information\n\u26a0\ufe0f Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T10:02:38.000000Z","updated_at":"2026-02-04T10:03:19.000000Z","category":{"id":15,"name":"Soft Silks","slug":"soft-silks","parent_id":9},"images":[{"id":14,"product_id":14,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/b2ef2354-cda9-4e2a-90e4-d73567e1b123.webp"}],"videos":[],"variant_combinations":[{"id":12,"product_id":14,"sku":"ssss","purchase_price":"5490.00","extra_price":"6960.00","discount":"10.00","quantity":120,"low_quantity":1,"created_at":"2026-02-04T10:03:05.000000Z","updated_at":"2026-02-04T10:03:05.000000Z","amount":6950,"values":[{"id":5,"variation_id":1,"value":"Green","color_code":"#44d70f","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:42.000000Z","pivot":{"variant_combination_id":12,"variation_value_id":5},"variation":{"id":1,"name":"Color"}}]}]},{"id":15,"name":"saree4","slug":"saree4","category_id":17,"brand_id":null,"description":"Discover the timeless beauty of Traditional Kanchipuram Sarees, crafted with rich silks and intricate designs. Perfect for weddings and festive occasions, each saree reflects heritage and culture.","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T10:40:32.000000Z","updated_at":"2026-02-04T10:41:56.000000Z","category":{"id":17,"name":"Kanchipuram Traditional","slug":"kanchipuram-traditional","parent_id":9},"images":[{"id":15,"product_id":15,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/553f28e5-7b4d-44c0-9ba7-ccba237f5431.webp"}],"videos":[{"id":18,"product_id":15,"video_url":"http:\/\/localhost:5173\/products"}],"variant_combinations":[{"id":13,"product_id":15,"sku":"ssss","purchase_price":"1500.00","extra_price":"1600.00","discount":"10.00","quantity":11,"low_quantity":1,"created_at":"2026-02-04T10:41:35.000000Z","updated_at":"2026-02-04T10:41:35.000000Z","amount":1590,"values":[{"id":5,"variation_id":1,"value":"Green","color_code":"#44d70f","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:42.000000Z","pivot":{"variant_combination_id":13,"variation_value_id":5},"variation":{"id":1,"name":"Color"}}]},{"id":14,"product_id":15,"sku":"dddd","purchase_price":"1600.00","extra_price":"1700.00","discount":"0.00","quantity":12,"low_quantity":1,"created_at":"2026-02-04T10:41:37.000000Z","updated_at":"2026-02-04T10:41:37.000000Z","amount":1700,"values":[{"id":6,"variation_id":1,"value":"Blue","color_code":"#3460e5","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:43.000000Z","pivot":{"variant_combination_id":14,"variation_value_id":6},"variation":{"id":1,"name":"Color"}}]}]},{"id":16,"name":"saree5","slug":"saree5","category_id":20,"brand_id":null,"description":"Discover the timeless beauty of Traditional Kanchipuram Sarees, crafted with rich silks and intricate designs. Perfect for weddings and festive occasions, each saree reflects heritage and culture.","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T10:43:00.000000Z","updated_at":"2026-02-04T10:43:41.000000Z","category":{"id":20,"name":"Chiniya Silk","slug":"chiniya-silk","parent_id":10},"images":[{"id":16,"product_id":16,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/89aa9a2f-5abe-44a2-bc93-bc99e7e30604.webp"}],"videos":[],"variant_combinations":[{"id":15,"product_id":16,"sku":"dddd","purchase_price":"1750.00","extra_price":"1850.00","discount":"0.00","quantity":120,"low_quantity":1,"created_at":"2026-02-04T10:43:25.000000Z","updated_at":"2026-02-04T10:43:25.000000Z","amount":1850,"values":[{"id":5,"variation_id":1,"value":"Green","color_code":"#44d70f","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:42.000000Z","pivot":{"variant_combination_id":15,"variation_value_id":5},"variation":{"id":1,"name":"Color"}}]}]},{"id":17,"name":"saree23","slug":"saree23","category_id":15,"brand_id":null,"description":"sdsdsdfsdf","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T11:41:37.000000Z","updated_at":"2026-02-04T11:42:32.000000Z","category":{"id":15,"name":"Soft Silks","slug":"soft-silks","parent_id":9},"images":[{"id":17,"product_id":17,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/1776779a-005d-4ca6-a4f7-587771250a7a.webp"}],"videos":[],"variant_combinations":[{"id":16,"product_id":17,"sku":"ddd1","purchase_price":"1200.00","extra_price":"1300.00","discount":"0.00","quantity":123,"low_quantity":1,"created_at":"2026-02-04T11:42:18.000000Z","updated_at":"2026-02-04T11:42:18.000000Z","amount":1300,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":16,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]},{"id":17,"product_id":17,"sku":"dddd","purchase_price":"1300.00","extra_price":"1400.00","discount":"0.00","quantity":141,"low_quantity":1,"created_at":"2026-02-04T11:42:18.000000Z","updated_at":"2026-02-04T11:42:18.000000Z","amount":1400,"values":[{"id":1,"variation_id":1,"value":"Black","color_code":"#000000","created_at":"2026-02-03T09:46:07.000000Z","updated_at":"2026-02-07T12:08:40.000000Z","pivot":{"variant_combination_id":17,"variation_value_id":1},"variation":{"id":1,"name":"Color"}}]},{"id":18,"product_id":17,"sku":"dddd","purchase_price":"1400.00","extra_price":"1500.00","discount":"0.00","quantity":151,"low_quantity":1,"created_at":"2026-02-04T11:42:18.000000Z","updated_at":"2026-02-04T11:42:18.000000Z","amount":1500,"values":[{"id":5,"variation_id":1,"value":"Green","color_code":"#44d70f","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:42.000000Z","pivot":{"variant_combination_id":18,"variation_value_id":5},"variation":{"id":1,"name":"Color"}}]}]},{"id":18,"name":"Sample","slug":"sample","category_id":27,"brand_id":null,"description":"Cotton saree","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-07T06:24:41.000000Z","updated_at":"2026-02-07T06:30:21.000000Z","category":{"id":27,"name":"Bengal Cotton","slug":"bengal-cotton","parent_id":13},"images":[{"id":18,"product_id":18,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/b234ff16-d349-4bf3-a7d1-06bbb957bc23.webp"}],"videos":[{"id":19,"product_id":18,"video_url":"http:\/\/localhost:5174\/products"}],"variant_combinations":[{"id":19,"product_id":18,"sku":"sku","purchase_price":"1300.00","extra_price":"1400.00","discount":"0.00","quantity":123,"low_quantity":1,"created_at":"2026-02-07T06:26:36.000000Z","updated_at":"2026-02-07T06:26:36.000000Z","amount":1400,"values":[{"id":1,"variation_id":1,"value":"Black","color_code":"#000000","created_at":"2026-02-03T09:46:07.000000Z","updated_at":"2026-02-07T12:08:40.000000Z","pivot":{"variant_combination_id":19,"variation_value_id":1},"variation":{"id":1,"name":"Color"}}]},{"id":20,"product_id":18,"sku":"sku","purchase_price":"1200.00","extra_price":"1500.00","discount":"0.00","quantity":122,"low_quantity":1,"created_at":"2026-02-07T06:26:39.000000Z","updated_at":"2026-02-07T06:26:39.000000Z","amount":1500,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":20,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]}]},{"id":19,"name":"sadasd","slug":"sadasd","category_id":27,"brand_id":null,"description":"asdasd","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-07T11:17:58.000000Z","updated_at":"2026-02-07T11:18:28.000000Z","category":{"id":27,"name":"Bengal Cotton","slug":"bengal-cotton","parent_id":13},"images":[{"id":19,"product_id":19,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/a3817ea5-e400-4745-b7f4-9d7edf84c1f7.webp"}],"videos":[{"id":20,"product_id":19,"video_url":"http:\/\/localhost:5175\/products"}],"variant_combinations":[{"id":21,"product_id":19,"sku":"1","purchase_price":"111.00","extra_price":"11.00","discount":"1.00","quantity":1,"low_quantity":1,"created_at":"2026-02-07T11:18:18.000000Z","updated_at":"2026-02-07T11:18:18.000000Z","amount":10,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":21,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]}]},{"id":20,"name":"Sareee123","slug":"sareee123","category_id":15,"brand_id":null,"description":"Descritopm","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-07T11:58:31.000000Z","updated_at":"2026-02-07T12:05:02.000000Z","category":{"id":15,"name":"Soft Silks","slug":"soft-silks","parent_id":9},"images":[{"id":20,"product_id":20,"is_primary":false,"image_url":"http:\/\/localhost\/storage\/products\/images\/417369e7-e306-4587-9fb8-ee0d2fc407a4.webp"},{"id":21,"product_id":20,"is_primary":false,"image_url":"http:\/\/localhost\/storage\/products\/images\/4f314af9-fcb6-4af2-897b-c93b90d84b0f.webp"}],"videos":[{"id":21,"product_id":20,"video_url":"http:\/\/localhost:5176\/products"}],"variant_combinations":[{"id":22,"product_id":20,"sku":"sku","purchase_price":"1500.00","extra_price":"1800.00","discount":"10.00","quantity":120,"low_quantity":10,"created_at":"2026-02-07T12:03:43.000000Z","updated_at":"2026-02-07T12:03:43.000000Z","amount":1790,"values":[{"id":1,"variation_id":1,"value":"Black","color_code":"#000000","created_at":"2026-02-03T09:46:07.000000Z","updated_at":"2026-02-07T12:08:40.000000Z","pivot":{"variant_combination_id":22,"variation_value_id":1},"variation":{"id":1,"name":"Color"}}]},{"id":23,"product_id":20,"sku":"dddd","purchase_price":"1800.00","extra_price":"2000.00","discount":"10.00","quantity":120,"low_quantity":11,"created_at":"2026-02-07T12:03:43.000000Z","updated_at":"2026-02-07T12:03:43.000000Z","amount":1990,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":23,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]}]}],"first_page_url":"http:\/\/localhost\/api\/ecom\/products?page=1","from":1,"last_page":1,"last_page_url":"http:\/\/localhost\/api\/ecom\/products?page=1","links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"http:\/\/localhost\/api\/ecom\/products?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"next_page_url":null,"path":"http:\/\/localhost\/api\/ecom\/products","per_page":12,"prev_page_url":null,"to":8,"total":8}}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/ecom/products-main
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"success":true,"data":{"current_page":1,"data":[{"id":13,"name":"Peacock Blue Patola Silk Cotton Saree","slug":"peacock-blue-patola-silk-cotton-saree","category_id":17,"brand_id":null,"description":"\ud83d\ude9a Free Shipping Domestic Free standard shipping on orders over 10,000 INR\n\ud83d\udd12 This site has implemented secure payment protocols to protect your financial information\n\u26a0\ufe0f Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.","purchase_price":null,"base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T09:46:09.000000Z","updated_at":"2026-02-04T10:07:43.000000Z","min_variant_price":"4410.00","category":{"id":17,"name":"Kanchipuram Traditional","slug":"kanchipuram-traditional","parent_id":9},"images":[{"id":13,"product_id":13,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/ed6c6e97-970f-47a8-98be-bf8f0910dd69.webp"}],"videos":[{"id":17,"product_id":13,"video_url":"http:\/\/localhost:5173\/products"}],"variant_combinations":[{"id":11,"product_id":13,"sku":"9JSR058100","purchase_price":"4510.00","extra_price":"4410.00","discount":"10.00","quantity":100,"low_quantity":1,"created_at":"2026-02-04T09:47:35.000000Z","updated_at":"2026-02-04T09:47:35.000000Z","amount":4400,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":11,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]}]},{"id":14,"name":"Soft Silk Saree2","slug":"soft-silk-saree2","category_id":15,"brand_id":null,"description":"\ud83d\ude9a Free Shipping Domestic Free standard shipping on orders over 10,000 INR\n\ud83d\udd12 This site has implemented secure payment protocols to protect your financial information\n\u26a0\ufe0f Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T10:02:38.000000Z","updated_at":"2026-02-04T10:03:19.000000Z","min_variant_price":"6960.00","category":{"id":15,"name":"Soft Silks","slug":"soft-silks","parent_id":9},"images":[{"id":14,"product_id":14,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/b2ef2354-cda9-4e2a-90e4-d73567e1b123.webp"}],"videos":[],"variant_combinations":[{"id":12,"product_id":14,"sku":"ssss","purchase_price":"5490.00","extra_price":"6960.00","discount":"10.00","quantity":120,"low_quantity":1,"created_at":"2026-02-04T10:03:05.000000Z","updated_at":"2026-02-04T10:03:05.000000Z","amount":6950,"values":[{"id":5,"variation_id":1,"value":"Green","color_code":"#44d70f","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:42.000000Z","pivot":{"variant_combination_id":12,"variation_value_id":5},"variation":{"id":1,"name":"Color"}}]}]},{"id":15,"name":"saree4","slug":"saree4","category_id":17,"brand_id":null,"description":"Discover the timeless beauty of Traditional Kanchipuram Sarees, crafted with rich silks and intricate designs. Perfect for weddings and festive occasions, each saree reflects heritage and culture.","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T10:40:32.000000Z","updated_at":"2026-02-04T10:41:56.000000Z","min_variant_price":"1600.00","category":{"id":17,"name":"Kanchipuram Traditional","slug":"kanchipuram-traditional","parent_id":9},"images":[{"id":15,"product_id":15,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/553f28e5-7b4d-44c0-9ba7-ccba237f5431.webp"}],"videos":[{"id":18,"product_id":15,"video_url":"http:\/\/localhost:5173\/products"}],"variant_combinations":[{"id":13,"product_id":15,"sku":"ssss","purchase_price":"1500.00","extra_price":"1600.00","discount":"10.00","quantity":11,"low_quantity":1,"created_at":"2026-02-04T10:41:35.000000Z","updated_at":"2026-02-04T10:41:35.000000Z","amount":1590,"values":[{"id":5,"variation_id":1,"value":"Green","color_code":"#44d70f","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:42.000000Z","pivot":{"variant_combination_id":13,"variation_value_id":5},"variation":{"id":1,"name":"Color"}}]},{"id":14,"product_id":15,"sku":"dddd","purchase_price":"1600.00","extra_price":"1700.00","discount":"0.00","quantity":12,"low_quantity":1,"created_at":"2026-02-04T10:41:37.000000Z","updated_at":"2026-02-04T10:41:37.000000Z","amount":1700,"values":[{"id":6,"variation_id":1,"value":"Blue","color_code":"#3460e5","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:43.000000Z","pivot":{"variant_combination_id":14,"variation_value_id":6},"variation":{"id":1,"name":"Color"}}]}]},{"id":16,"name":"saree5","slug":"saree5","category_id":20,"brand_id":null,"description":"Discover the timeless beauty of Traditional Kanchipuram Sarees, crafted with rich silks and intricate designs. Perfect for weddings and festive occasions, each saree reflects heritage and culture.","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T10:43:00.000000Z","updated_at":"2026-02-04T10:43:41.000000Z","min_variant_price":"1850.00","category":{"id":20,"name":"Chiniya Silk","slug":"chiniya-silk","parent_id":10},"images":[{"id":16,"product_id":16,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/89aa9a2f-5abe-44a2-bc93-bc99e7e30604.webp"}],"videos":[],"variant_combinations":[{"id":15,"product_id":16,"sku":"dddd","purchase_price":"1750.00","extra_price":"1850.00","discount":"0.00","quantity":120,"low_quantity":1,"created_at":"2026-02-04T10:43:25.000000Z","updated_at":"2026-02-04T10:43:25.000000Z","amount":1850,"values":[{"id":5,"variation_id":1,"value":"Green","color_code":"#44d70f","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:42.000000Z","pivot":{"variant_combination_id":15,"variation_value_id":5},"variation":{"id":1,"name":"Color"}}]}]},{"id":17,"name":"saree23","slug":"saree23","category_id":15,"brand_id":null,"description":"sdsdsdfsdf","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-04T11:41:37.000000Z","updated_at":"2026-02-04T11:42:32.000000Z","min_variant_price":"1300.00","category":{"id":15,"name":"Soft Silks","slug":"soft-silks","parent_id":9},"images":[{"id":17,"product_id":17,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/1776779a-005d-4ca6-a4f7-587771250a7a.webp"}],"videos":[],"variant_combinations":[{"id":16,"product_id":17,"sku":"ddd1","purchase_price":"1200.00","extra_price":"1300.00","discount":"0.00","quantity":123,"low_quantity":1,"created_at":"2026-02-04T11:42:18.000000Z","updated_at":"2026-02-04T11:42:18.000000Z","amount":1300,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":16,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]},{"id":17,"product_id":17,"sku":"dddd","purchase_price":"1300.00","extra_price":"1400.00","discount":"0.00","quantity":141,"low_quantity":1,"created_at":"2026-02-04T11:42:18.000000Z","updated_at":"2026-02-04T11:42:18.000000Z","amount":1400,"values":[{"id":1,"variation_id":1,"value":"Black","color_code":"#000000","created_at":"2026-02-03T09:46:07.000000Z","updated_at":"2026-02-07T12:08:40.000000Z","pivot":{"variant_combination_id":17,"variation_value_id":1},"variation":{"id":1,"name":"Color"}}]},{"id":18,"product_id":17,"sku":"dddd","purchase_price":"1400.00","extra_price":"1500.00","discount":"0.00","quantity":151,"low_quantity":1,"created_at":"2026-02-04T11:42:18.000000Z","updated_at":"2026-02-04T11:42:18.000000Z","amount":1500,"values":[{"id":5,"variation_id":1,"value":"Green","color_code":"#44d70f","created_at":"2026-02-04T06:56:12.000000Z","updated_at":"2026-02-07T12:08:42.000000Z","pivot":{"variant_combination_id":18,"variation_value_id":5},"variation":{"id":1,"name":"Color"}}]}]},{"id":18,"name":"Sample","slug":"sample","category_id":27,"brand_id":null,"description":"Cotton saree","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-07T06:24:41.000000Z","updated_at":"2026-02-07T06:30:21.000000Z","min_variant_price":"1400.00","category":{"id":27,"name":"Bengal Cotton","slug":"bengal-cotton","parent_id":13},"images":[{"id":18,"product_id":18,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/b234ff16-d349-4bf3-a7d1-06bbb957bc23.webp"}],"videos":[{"id":19,"product_id":18,"video_url":"http:\/\/localhost:5174\/products"}],"variant_combinations":[{"id":19,"product_id":18,"sku":"sku","purchase_price":"1300.00","extra_price":"1400.00","discount":"0.00","quantity":123,"low_quantity":1,"created_at":"2026-02-07T06:26:36.000000Z","updated_at":"2026-02-07T06:26:36.000000Z","amount":1400,"values":[{"id":1,"variation_id":1,"value":"Black","color_code":"#000000","created_at":"2026-02-03T09:46:07.000000Z","updated_at":"2026-02-07T12:08:40.000000Z","pivot":{"variant_combination_id":19,"variation_value_id":1},"variation":{"id":1,"name":"Color"}}]},{"id":20,"product_id":18,"sku":"sku","purchase_price":"1200.00","extra_price":"1500.00","discount":"0.00","quantity":122,"low_quantity":1,"created_at":"2026-02-07T06:26:39.000000Z","updated_at":"2026-02-07T06:26:39.000000Z","amount":1500,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":20,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]}]},{"id":19,"name":"sadasd","slug":"sadasd","category_id":27,"brand_id":null,"description":"asdasd","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-07T11:17:58.000000Z","updated_at":"2026-02-07T11:18:28.000000Z","min_variant_price":"11.00","category":{"id":27,"name":"Bengal Cotton","slug":"bengal-cotton","parent_id":13},"images":[{"id":19,"product_id":19,"is_primary":true,"image_url":"http:\/\/localhost\/storage\/products\/images\/a3817ea5-e400-4745-b7f4-9d7edf84c1f7.webp"}],"videos":[{"id":20,"product_id":19,"video_url":"http:\/\/localhost:5175\/products"}],"variant_combinations":[{"id":21,"product_id":19,"sku":"1","purchase_price":"111.00","extra_price":"11.00","discount":"1.00","quantity":1,"low_quantity":1,"created_at":"2026-02-07T11:18:18.000000Z","updated_at":"2026-02-07T11:18:18.000000Z","amount":10,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":21,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]}]},{"id":20,"name":"Sareee123","slug":"sareee123","category_id":15,"brand_id":null,"description":"Descritopm","purchase_price":"0.00","base_price":null,"discount":"0.00","status":"Published","created_at":"2026-02-07T11:58:31.000000Z","updated_at":"2026-02-07T12:05:02.000000Z","min_variant_price":"1800.00","category":{"id":15,"name":"Soft Silks","slug":"soft-silks","parent_id":9},"images":[{"id":20,"product_id":20,"is_primary":false,"image_url":"http:\/\/localhost\/storage\/products\/images\/417369e7-e306-4587-9fb8-ee0d2fc407a4.webp"},{"id":21,"product_id":20,"is_primary":false,"image_url":"http:\/\/localhost\/storage\/products\/images\/4f314af9-fcb6-4af2-897b-c93b90d84b0f.webp"}],"videos":[{"id":21,"product_id":20,"video_url":"http:\/\/localhost:5176\/products"}],"variant_combinations":[{"id":22,"product_id":20,"sku":"sku","purchase_price":"1500.00","extra_price":"1800.00","discount":"10.00","quantity":120,"low_quantity":10,"created_at":"2026-02-07T12:03:43.000000Z","updated_at":"2026-02-07T12:03:43.000000Z","amount":1790,"values":[{"id":1,"variation_id":1,"value":"Black","color_code":"#000000","created_at":"2026-02-03T09:46:07.000000Z","updated_at":"2026-02-07T12:08:40.000000Z","pivot":{"variant_combination_id":22,"variation_value_id":1},"variation":{"id":1,"name":"Color"}}]},{"id":23,"product_id":20,"sku":"dddd","purchase_price":"1800.00","extra_price":"2000.00","discount":"10.00","quantity":120,"low_quantity":11,"created_at":"2026-02-07T12:03:43.000000Z","updated_at":"2026-02-07T12:03:43.000000Z","amount":1990,"values":[{"id":4,"variation_id":1,"value":"Red","color_code":"#eb0f0f","created_at":"2026-02-04T06:56:11.000000Z","updated_at":"2026-02-07T12:08:41.000000Z","pivot":{"variant_combination_id":23,"variation_value_id":4},"variation":{"id":1,"name":"Color"}}]}]}],"first_page_url":"http:\/\/localhost\/api\/ecom\/products-main?page=1","from":1,"last_page":1,"last_page_url":"http:\/\/localhost\/api\/ecom\/products-main?page=1","links":[{"url":null,"label":"&laquo; Previous","page":null,"active":false},{"url":"http:\/\/localhost\/api\/ecom\/products-main?page=1","label":"1","page":1,"active":true},{"url":null,"label":"Next &raquo;","page":null,"active":false}],"next_page_url":null,"path":"http:\/\/localhost\/api\/ecom\/products-main","per_page":12,"prev_page_url":null,"to":8,"total":8}}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/ecom/app-logo-settings
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"success":true,"data":{"id":1,"app_name":"Hamsini-Silks","app_logo":"settings\/c79651c9-a33b-4e7c-b1f1-30893ee1f11e.webp","app_favicon":"settings\/6f432dfb-f718-4a89-b00e-bcd255216a1a.webp","created_at":"2026-02-03T07:03:27.000000Z","updated_at":"2026-02-07T12:07:50.000000Z","app_logo_url":"http:\/\/localhost\/storage\/settings\/c79651c9-a33b-4e7c-b1f1-30893ee1f11e.webp","app_favicon_url":"http:\/\/localhost\/storage\/settings\/6f432dfb-f718-4a89-b00e-bcd255216a1a.webp"}}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/ecom/list-brand
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"brands":[]}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user-dashboard/cart/sync
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/user-dashboard/cart
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: api/user-dashboard/cart/clear
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/user-dashboard/cart/get-address
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user-dashboard/cart/add-address
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      phone:
+        custom: []
+        name: phone
+        description: 'Must be 10 digits.'
+        required: true
+        example: '8107987494'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      address:
+        custom: []
+        name: address
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      city:
+        custom: []
+        name: city
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: mqeopfuudtdsufvyvddqa
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      state:
+        custom: []
+        name: state
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: mniihfqcoynlazghdtqtq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      country:
+        custom: []
+        name: country
+        description: 'Must not be greater than 100 characters.'
+        required: false
+        example: xbajwbpilpmufinllwloa
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      pincode:
+        custom: []
+        name: pincode
+        description: 'Must be 6 digits.'
+        required: true
+        example: '810798'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      phone: '8107987494'
+      address: consequatur
+      city: mqeopfuudtdsufvyvddqa
+      state: mniihfqcoynlazghdtqtq
+      country: xbajwbpilpmufinllwloa
+      pincode: '810798'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/user-dashboard/cart/update-address/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the update address.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      phone:
+        custom: []
+        name: phone
+        description: 'Must be 10 digits.'
+        required: true
+        example: '8107987494'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      address:
+        custom: []
+        name: address
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      city:
+        custom: []
+        name: city
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: mqeopfuudtdsufvyvddqa
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      state:
+        custom: []
+        name: state
+        description: 'Must not be greater than 100 characters.'
+        required: true
+        example: mniihfqcoynlazghdtqtq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      country:
+        custom: []
+        name: country
+        description: 'Must not be greater than 100 characters.'
+        required: false
+        example: xbajwbpilpmufinllwloa
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      pincode:
+        custom: []
+        name: pincode
+        description: 'Must be 6 digits.'
+        required: true
+        example: '810798'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      phone: '8107987494'
+      address: consequatur
+      city: mqeopfuudtdsufvyvddqa
+      state: mniihfqcoynlazghdtqtq
+      country: xbajwbpilpmufinllwloa
+      pincode: '810798'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/user-dashboard/cart/delete-address/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the delete address.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/user-dashboard/cart/set-default-address/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the set default address.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user-dashboard/cart/create-order
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      amount:
+        custom: []
+        name: amount
+        description: 'Must be at least 1.'
+        required: true
+        example: 73
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      amount: 73
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user-dashboard/cart/verify-payment
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      razorpay_order_id:
+        custom: []
+        name: razorpay_order_id
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      razorpay_payment_id:
+        custom: []
+        name: razorpay_payment_id
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      razorpay_signature:
+        custom: []
+        name: razorpay_signature
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      razorpay_order_id: consequatur
+      razorpay_payment_id: consequatur
+      razorpay_signature: consequatur
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user-dashboard/cart/save-order
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      address_id:
+        custom: []
+        name: address_id
+        description: ''
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      items:
+        custom: []
+        name: items
+        description: 'Must have at least 1 items.'
+        required: true
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      payment_method:
+        custom: []
+        name: payment_method
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      payment_id:
+        custom: []
+        name: payment_id
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      subtotal:
+        custom: []
+        name: subtotal
+        description: ''
+        required: true
+        example: 11613.31890586
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      total_amount:
+        custom: []
+        name: total_amount
+        description: ''
+        required: true
+        example: 11613.31890586
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      address_id: 17
+      items: []
+      payment_method: consequatur
+      payment_id: consequatur
+      subtotal: 11613.31890586
+      total_amount: 11613.31890586
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user-dashboard/cart/apply-coupon
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      code:
+        custom: []
+        name: code
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      amount:
+        custom: []
+        name: amount
+        description: 'Must be at least 1.'
+        required: true
+        example: 45
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      code: consequatur
+      amount: 45
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user-dashboard/orders
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      address_id:
+        custom: []
+        name: address_id
+        description: "'user_id'                     => 'required|exists:users,id',. The <code>id</code> of an existing record in the addresses table."
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      payment:
+        custom: []
+        name: payment
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      payment.method:
+        custom: []
+        name: payment.method
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      payment.razorpay_order_id:
+        custom: []
+        name: payment.razorpay_order_id
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      payment.razorpay_payment_id:
+        custom: []
+        name: payment.razorpay_payment_id
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      payment.amount:
+        custom: []
+        name: payment.amount
+        description: 'Must be at least 1.'
+        required: true
+        example: 45
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      price_details:
+        custom: []
+        name: price_details
+        description: ''
+        required: false
+        example: []
+        type: object
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      price_details.subtotal:
+        custom: []
+        name: price_details.subtotal
+        description: 'Must be at least 1.'
+        required: true
+        example: 56
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      price_details.discount:
+        custom: []
+        name: price_details.discount
+        description: 'Must be at least 0.'
+        required: false
+        example: 16
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      price_details.coupon_code:
+        custom: []
+        name: price_details.coupon_code
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      price_details.total_amount:
+        custom: []
+        name: price_details.total_amount
+        description: 'Must be at least 1.'
+        required: true
+        example: 45
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      items:
+        custom: []
+        name: items
+        description: 'Must have at least 1 items.'
+        required: true
+        example:
+          - []
+        type: 'object[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'items[].product_id':
+        custom: []
+        name: 'items[].product_id'
+        description: 'The <code>id</code> of an existing record in the products table.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'items[].quantity':
+        custom: []
+        name: 'items[].quantity'
+        description: 'Must be at least 1.'
+        required: true
+        example: 45
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'items[].price':
+        custom: []
+        name: 'items[].price'
+        description: 'Must be at least 1.'
+        required: true
+        example: 56
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      'items[].total':
+        custom: []
+        name: 'items[].total'
+        description: 'Must be at least 1.'
+        required: true
+        example: 17
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      address_id: consequatur
+      payment:
+        method: consequatur
+        razorpay_order_id: consequatur
+        razorpay_payment_id: consequatur
+        amount: 45
+      price_details:
+        subtotal: 56
+        discount: 16
+        coupon_code: consequatur
+        total_amount: 45
+      items:
+        -
+          product_id: consequatur
+          quantity: 45
+          price: 56
+          total: 17
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/user-dashboard/orders/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the order.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/user-dashboard/get-my-orders/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the get my order.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/user-dashboard/orders/{id}'
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'The ID of the order.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: consequatur
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/user-dashboard/get-wishlist
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error":"HTTP_ERROR","message":"Token not provided"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/user-dashboard/wishlist-toggle
+    metadata:
+      custom: []
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      product_id:
+        custom: []
+        name: product_id
+        description: 'The <code>id</code> of an existing record in the products table.'
+        required: true
+        example: consequatur
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      product_id: consequatur
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 3V5EgbkvZcDPa166h8fd4ae
+    controller: null
+    method: null
+    route: null
