@@ -32,6 +32,7 @@ use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\ShiprocketController;
 use App\Http\Controllers\StaffAttendanceController;
 use App\Http\Controllers\StaffUserController;
+use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\WhatsappSettingController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,14 @@ Route::post('/payment/create', [phonepaycontroller::class, 'create']);
 
 Route::get('/payment/status/{transactionId}',
     [phonepaycontroller::class, 'status']);
+
+Route::prefix('whatsapp')->group(function () {
+Route::post('/webhook',[WhatsAppController::class,'webhook']);
+
+    Route::post('/payment', [CartController::class, 'createPaymentLink']);
+
+});
+
 
 Route::prefix('auth')->group(function () {
 

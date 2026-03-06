@@ -27,160 +27,157 @@ class ProductBulkImport implements ToCollection
     */
 
     public $errors = [];
- public function collection(Collection $rows)
-    {
-        unset($rows[0]); // skip header
+    public function collection(Collection $rows)
+        {
+            unset($rows[0]); // skip header
 
-        foreach ($rows as $index => $row) {
+            foreach ($rows as $index => $row) {
 
-            DB::beginTransaction();
+                DB::beginTransaction();
 
-            try {
+                try {
 
-                /* ---------------------------
-                | BASIC VALIDATION
-                ---------------------------- */
+                    /* ---------------------------
+                    | BASIC VALIDATION
+                    ---------------------------- */
 
-                if(empty($row[0])) {
-                    throw new \Exception("Product name missing");
-                }
+                    if(empty($row[0])) {
+                        throw new \Exception("Product name missing");
+                    }
 
-                if(empty($row[1])) {
-                    throw new \Exception("Category name missing");
-                }
+                    if(empty($row[1])) {
+                        throw new \Exception("Category name missing");
+                    }
 
-                if(empty($row[3])) {
-                    throw new \Exception("SKU missing");
-                }
+                    if(empty($row[3])) {
+                        throw new \Exception("SKU missing");
+                    }
 
-                /* ---------------------------
-                | GET CATEGORY
-                ---------------------------- */
+                    /* ---------------------------
+                    | GET CATEGORY
+                    ---------------------------- */
 
-                $category = Category::where('name', trim($row[1]))->first();
+                    $category = Category::where('name', trim($row[1]))->first();
 
-                if(!$category){
-                    throw new \Exception("Category not found: ".$row[1]);
-                }
+                    if(!$category){
+                        throw new \Exception("Category not found: ".$row[1]);
+                    }
 
-                /* ---------------------------
-                | CREATE OR FIND PRODUCT
-                ---------------------------- */
+                    /* ---------------------------
+                    | CREATE OR FIND PRODUCT
+                    ---------------------------- */
 
-                // $product = Product::firstOrCreate(
-                //     [
-                //         'name' => $row[0],
-                //         'category_id' => $category->id
-                //     ],
-                //     [
-                //         'slug' => Str::slug($row[0]) . '-' . rand(100,999),
-                //         'description' => $row[2] ?? null,
-                //         'status' => 'published'
-                //     ]
-                // );
+                    $product = Product::firstOrCreate(
+                        [
+                            'name' => $row[0],
+                            'category_id' => $category->id
+                        ],
+                        [
+                            'slug' => Str::slug($row[0]) . '-' . rand(100,999),
+                            'description' => $row[2] ?? null,
+                            'status' => 'Published'
+                        ]
+                    );
 
-                $product = Product::create([
-                        'name' => trim($row[0]),
-                        'category_id' => $category->id,
-                        'slug' => Str::slug($row[0]) . '-' . uniqid(),
-                        'description' => $row[2] ?? null,
-                        'status' => 'published'
-                    ]);
+                    // $product = Product::create([
+                    //         'name' => trim($row[0]),
+                    //         'category_id' => $category->id,
+                    //         'slug' => Str::slug($row[0]) . '-' . uniqid(),
+                    //         'description' => $row[2] ?? null,
+                    //         'status' => 'published'
+                    //     ]);
 
-                /* ---------------------------
-                | SEO + TAX (FIRST TIME)
-                ---------------------------- */
+                    /* ---------------------------
+                    | SEO + TAX (FIRST TIME)
+                    ---------------------------- */
 
-                if ($product->wasRecentlyCreated) {
+                    if ($product->wasRecentlyCreated) {
 
-                    ProductSeoMeta::create([
-                        'product_id' => $product->id,
-                        'meta_title' => $row[17] ?? null,
-                        'meta_description' => $row[18] ?? null,
-                        'meta_tags' => $row[19] ?? null
-                    ]);
+                        ProductSeoMeta::create([
+                            'product_id' => $product->id,
+                            'meta_title' => $row[17] ?? null,
+                            'meta_description' => $row[18] ?? null,
+                            'meta_tags' => $row[19] ?? null
+                        ]);
 
-                    ProductTaxAffinity::create([
+                        ProductTaxAffinity::create([
+                            'product_id'=>$product->id,
+                            'gst_enabled'=>1,
+                            'gst_type'=>'inclusive',
+                            'gst_percent'=>$row[20] ?? 0,
+                            'affinity_enabled'=>0,
+                            'affinity_percent'=>0
+                        ]);
+                    }
+
+                    /* ---------------------------
+                    | CREATE VARIANT
+                    ---------------------------- */
+
+                    $variant = ProductVariantCombination::create([
                         'product_id'=>$product->id,
-                        'gst_enabled'=>1,
-                        'gst_type'=>'inclusive',
-                        'gst_percent'=>$row[20] ?? 0,
-                        'affinity_enabled'=>0,
-                        'affinity_percent'=>0
+                        'sku'=>$row[3],
+                        'purchase_price'=>$row[4] ?? 0,
+                        'extra_price'=>$row[5] ?? 0,
+                        'discount'=>$row[6] ?? 0,
+                        'quantity'=>$row[7] ?? 0,
+                        'low_quantity'=>$row[8] ?? 0
                     ]);
+
+                    /* ---------------------------
+                    | VARIATIONS
+                    ---------------------------- */
+                        $variationColumns = [9,10,11,12,13,14,15,16];
+
+                        $filledVariations = [];
+
+                        foreach ($variationColumns as $col) {
+
+                            if (!empty($row[$col])) {
+                                $filledVariations[$col] = trim($row[$col]);
+                            }
+                        }
+
+                        if(count($filledVariations) > 0){
+
+                            foreach ($filledVariations as $value) {
+
+                                $variationValue = ProductVariationValue::where('value', $value)->first();
+
+                                if (!$variationValue) {
+                                    throw new \Exception("Variation value not found: " . $value);
+                                }
+
+                                ProductVariantCombinationValue::create([
+                                    'variant_combination_id' => $variant->id,
+                                    'variation_value_id'     => $variationValue->id
+                                ]);
+                            }
+                        }
+
+                    /* ---------------------------
+                    | VIDEO
+                    ---------------------------- */
+
+                    if(!empty($row[21]) && $product->wasRecentlyCreated){
+
+                        ProductVideo::create([
+                            'product_id'=>$product->id,
+                            'video_url'=>$row[21]
+                        ]);
+                    }
+
+                    DB::commit();
+
+                } catch (\Exception $e) {
+
+                    DB::rollBack();
+
+                    $this->errors[] = [
+                        'row' => $index + 1,
+                        'message' => $e->getMessage()
+                    ];
                 }
-
-                /* ---------------------------
-                | CREATE VARIANT
-                ---------------------------- */
-
-                $variant = ProductVariantCombination::create([
-                    'product_id'=>$product->id,
-                    'sku'=>$row[3],
-                    'purchase_price'=>$row[4] ?? 0,
-                    'extra_price'=>$row[5] ?? 0,
-                    'discount'=>$row[6] ?? 0,
-                    'quantity'=>$row[7] ?? 0,
-                    'low_quantity'=>$row[8] ?? 0
-                ]);
-
-                /* ---------------------------
-                | VARIATIONS
-                ---------------------------- */
-
-               $variationColumns = [
-    9,  // color
-    10, // size
-    11, // volume
-    12, // weight
-    13, // material
-    14, // pattern
-    15, // pack_size
-    16  // model
-];
-
-foreach ($variationColumns as $col) {
-
-    $value = isset($row[$col]) ? trim($row[$col]) : null;
-
-    if ($value) {
-
-        $variationValue = ProductVariationValue::where('value', $value)->first();
-
-        if (!$variationValue) {
-            throw new \Exception("Variation value not found: " . $value);
-        }
-
-        ProductVariantCombinationValue::create([
-            'variant_combination_id' => $variant->id,
-            'variation_value_id'     => $variationValue->id
-        ]);
-    }
-}
-
-                /* ---------------------------
-                | VIDEO
-                ---------------------------- */
-
-                if(!empty($row[21]) && $product->wasRecentlyCreated){
-
-                    ProductVideo::create([
-                        'product_id'=>$product->id,
-                        'video_url'=>$row[21]
-                    ]);
-                }
-
-                DB::commit();
-
-            } catch (\Exception $e) {
-
-                DB::rollBack();
-
-                $this->errors[] = [
-                    'row' => $index + 1,
-                    'message' => $e->getMessage()
-                ];
             }
         }
-    }
 }

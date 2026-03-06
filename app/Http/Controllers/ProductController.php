@@ -199,9 +199,9 @@ class ProductController extends Controller
             'category_id'      => 'required|exists:categories,id',
             'brand_id'         => 'nullable|exists:brands,id',
 
-            'purchase_price'   => 'nullable|numeric|min:0',
-            'base_price'       => 'nullable|numeric|min:0',
-            'discount'         => 'nullable|numeric|min:0',
+            // 'purchase_price'   => 'nullable|numeric|min:0',
+            // 'base_price'       => 'nullable|numeric|min:0',
+            // 'discount'         => 'nullable|numeric|min:0',
             'status'           => 'nullable|in:draft,active,inactive',
 
             'specifications'   => 'nullable|array',
@@ -223,9 +223,9 @@ class ProductController extends Controller
             'category_id'    => $request->category_id,
             'brand_id'       => $request->brand_id,
 
-            'purchase_price' => $request->purchase_price,
-            'base_price'     => $request->base_price,
-            'discount'       => $request->discount,
+            // 'purchase_price' => $request->purchase_price,
+            // 'base_price'     => $request->base_price,
+            // 'discount'       => $request->discount,
             'status'         => $request->status ?? 'draft',
 
             'specifications' => $request->specifications ?? [],
@@ -251,9 +251,9 @@ class ProductController extends Controller
             'category_id'      => 'required|exists:categories,id',
             'brand_id'         => 'nullable|exists:brands,id',
 
-            'purchase_price'   => 'nullable|numeric|min:0',
-            'base_price'       => 'nullable|numeric|min:0',
-            'discount'         => 'nullable|numeric|min:0',
+            // 'purchase_price'   => 'nullable|numeric|min:0',
+            // 'base_price'       => 'nullable|numeric|min:0',
+            // 'discount'         => 'nullable|numeric|min:0',
             'status'           => 'nullable|in:draft,active,inactive',
 
             'specifications'   => 'nullable|array',
