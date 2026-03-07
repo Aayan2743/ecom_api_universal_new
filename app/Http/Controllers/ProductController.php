@@ -513,22 +513,57 @@ class ProductController extends Controller
         ]);
     }
 
-   public function posProductsSearch(Request $request)
-{
-    $search = $request->search;
+    public function posProductsSearch(Request $request)
+    {
+        $search = $request->search;
 
-    $products = Product::with([
-        'variants:id,product_id,name,price,stock'
-    ])
-    ->select('id','name','category_id')
-    ->where('name', 'like', "%{$search}%")
-    ->limit(20)
-    ->get();
+        $products = Product::with([
+            'variants',
+            'variants.images',
+            'variants.values',
+        ])
+            ->select('id', 'name')
+            ->where('name', 'like', "%{$search}%")
+            ->limit(20)
+            ->get()
+            ->map(function ($product) {
 
-    return response()->json([
-        'data' => $products,
-    ]);
-}
+                return [
+                    'id'        => $product->id,
+                    'name'      => $product->name,
+
+                    // first variant image as product image
+                    'image_url' => optional($product->variants->first()->images->first())->image_path
+                        ? asset('storage/products/variant-images/' . $product->variants->first()->images->first()->image_path)
+                        : null,
+
+                    'variants'  => $product->variants->map(function ($variant) {
+
+                        return [
+                            'id'     => $variant->id,
+
+                            // variant name from variation values
+                            'name'   => $variant->values->pluck('value')->implode(' / '),
+
+                            'price'  => $variant->amount,
+
+                            'stock'  => $variant->quantity ?? 0,
+
+                            'images' => $variant->images->map(function ($img) {
+                                return [
+                                    'id'        => $img->id,
+                                    'image_url' => asset('storage/products/variant-images/' . $img->image_path),
+                                ];
+                            }),
+                        ];
+                    }),
+                ];
+            });
+
+        return response()->json([
+            'data' => $products,
+        ]);
+    }
 
     public function collection(Request $request)
     {

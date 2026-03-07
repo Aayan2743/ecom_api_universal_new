@@ -42,6 +42,8 @@ Route::post('/payment/create', [phonepaycontroller::class, 'create']);
 Route::get('/payment/status/{transactionId}',
     [phonepaycontroller::class, 'status']);
 
+Route::post('/webhook', [CartController::class, 'razorpayWebhook']);
+
 Route::prefix('whatsapp')->group(function () {
     Route::post('/webhook', [WhatsAppController::class, 'webhook']);
 
@@ -225,6 +227,7 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     // create pos order
     Route::post('/send-order-otp', [PosController::class, 'sendOrderOtp']);
     Route::post('/create-payment-link', [CartController::class, 'createPaymentLink']);
+    Route::post('/check-payment-link', [CartController::class, 'checkPaymentLink']);
 
     // 🟢 Step 2: Verify OTP & Create Final Order
     Route::post('/verify-order-otp', [PosController::class, 'verifyOrderOtp']);

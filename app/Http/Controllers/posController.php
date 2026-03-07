@@ -184,6 +184,16 @@ class posController extends Controller
 
             DB::commit();
 
+            // return response()->json([
+            //     'success' => true,
+            //     'message' => 'Order created successfully',
+            //     'data'    => [
+            //         'sale_id'        => $sale->id,
+            //         'invoice_number' => $sale->invoice_number,
+            //         'grand_total'    => $sale->grand_total,
+            //     ],
+            // ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Order created successfully',
@@ -191,6 +201,17 @@ class posController extends Controller
                     'sale_id'        => $sale->id,
                     'invoice_number' => $sale->invoice_number,
                     'grand_total'    => $sale->grand_total,
+                    'subtotal'       => $sale->subtotal,
+                    'tax_total'      => $sale->tax_total,
+                    'items'          => $sale->items()->get()->map(function ($item) {
+
+                        return [
+                            'product_name' => $item->product_name,
+                            'qty'          => $item->quantity,
+                            'total'        => $item->total,
+                        ];
+
+                    }),
                 ],
             ]);
 

@@ -1,7 +1,9 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\PaymentLink;
 use App\Models\UserCart;
+use App\Services\Messenger360Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Razorpay\Api\Api;
@@ -176,13 +178,13 @@ class CartController extends Controller
 
     /* ================= PAYMENT LINK ================= */
 
-    public function createPaymentLink(Request $request)
+    public function createPaymentLink(Request $request, Messenger360Service $whatsapp)
     {
         try {
 
             $api = new Api(
-                env('RAZORPAY_KEY_ID'),
-                env('RAZORPAY_KEY_SECRET')
+                env('RAZORPAY_KEY'),
+                env('RAZORPAY_SECRET')
             );
 
             $validator = Validator::make($request->all(), [
@@ -199,18 +201,43 @@ class CartController extends Controller
             }
 
             $paymentLink = $api->paymentLink->create([
-                'amount'          => $request->amount * 100,
+                'amount'          => (int) round($request->amount * 100),
                 'currency'        => 'INR',
                 'description'     => 'POS Order Payment',
                 'customer'        => [
                     'name'    => $request->name,
-                    'contact' => '91' . preg_replace('/[^0-9]/', '', $request->phone),
+                    'contact' => '91' . $request->phone,
                 ],
+
+                'notes'           => [
+                    'sale_id' => $request->sale_id, // 🔥 IMPORTANT
+                ],
+
                 'notify'          => [
                     'sms' => true,
                 ],
                 'reminder_enable' => true,
             ]);
+
+            $payment = PaymentLink::create([
+                'razorpay_link_id' => $paymentLink['id'],
+                'payment_link'     => $paymentLink['short_url'],
+                'amount'           => $request->amount,
+                'customer_name'    => $request->name,
+                'customer_phone'   => $request->phone,
+                'status'           => 'pending',
+            ]);
+
+            // 🔥 SEND WHATSAPP MESSAGE
+            $phone = '91' . $request->phone;
+
+            $message =
+                "Hello {$request->name},\n\n" .
+                "Please complete your payment using the link below:\n" .
+                $paymentLink['short_url'] . "\n\n" .
+                "Thank you.";
+
+            $whatsapp->send($phone, $message);
 
             return response()->json([
                 'success'      => true,
@@ -227,4 +254,97 @@ class CartController extends Controller
         }
     }
 
+    public function razorpayWebhook(Request $request)
+    {
+        \Log::info('Razorpay Webhook', $request->all());
+
+        try {
+
+            if ($request->event == 'payment.captured') {
+
+                $payment = $request->payload['payment']['entity'];
+
+                $linkId = $request->payload['payment_link']['entity']['id'] ?? null;
+
+                \Log::info('Payment Captured', [
+                    'payment_id' => $payment['id'],
+                    'link_id'    => $linkId,
+                ]);
+
+                if ($linkId) {
+
+                    $updated = PaymentLink::where('razorpay_link_id', $linkId)
+                        ->update([
+                            'status'  => 'paid',
+                            'paid_at' => now(),
+                        ]);
+
+                    \Log::info('Payment Data base', [
+                        'updated_rows' => $updated,
+                    ]);
+                }
+
+            }
+
+            return response()->json(['success' => true]);
+
+        } catch (\Exception $e) {
+
+            \Log::error('Webhook Error', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function checkPaymentLink(Request $request)
+    {
+        try {
+
+            $validator = Validator::make($request->all(), [
+                'link_id' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                ]);
+            }
+
+            $api = new Api(
+                env('RAZORPAY_KEY'),
+                env('RAZORPAY_SECRET')
+            );
+
+            $link = $api->paymentLink->fetch($request->link_id);
+
+            if ($link['status'] == 'paid') {
+
+                PaymentLink::where('razorpay_link_id', $request->link_id)
+                    ->update([
+                        'status'  => 'paid',
+                        'paid_at' => now(),
+                    ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment received',
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment not completed',
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
 }
