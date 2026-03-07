@@ -14,7 +14,8 @@ class CustomerController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name'  => 'required|string|max:255',
-            'phone' => 'required|digits:10|unique:users,phone',
+            // 'phone' => 'required|digits:10|unique:users,phone',
+            'phone' => 'required|digits:10',
         ]);
 
         if ($validator->fails()) {
@@ -79,7 +80,7 @@ class CustomerController extends Controller
         ]);
     }
 
-         public function searchUser_w(Request $request)
+    public function searchUser_w(Request $request)
     {
 
         $validator = Validator::make($request->all(), [
@@ -126,81 +127,80 @@ class CustomerController extends Controller
         ]);
     }
 
-
     public function searchUser(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'phone' => 'required|digits:10',
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|digits:10',
+        ]);
 
-    if ($validator->fails()) {
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $user = User::with('addresses')
+            ->where('phone', $request->phone)
+            ->where('role', 'user')
+            ->first();
+
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        // âœ… Load sales with sale items
+        $orders = Sale::with('items')
+            ->where('customer_id', $user->id)
+            ->latest()
+            ->get()
+            ->map(function ($sale) {
+
+                return [
+                    'id'             => $sale->id,
+                    'invoice_number' => $sale->invoice_number,
+                    'grand_total'    => $sale->grand_total,
+                    'payment_method' => $sale->payment_method,
+                    'payment_status' => $sale->payment_status,
+                    'date'           => $sale->created_at->format('Y-m-d'),
+
+                    // ðŸ”¥ SALE ITEMS
+                    'items'          => $sale->items->map(function ($item) {
+                        return [
+                            'id'           => $item->id,
+                            'product_id'   => $item->product_id,
+                            'product_name' => $item->product_name ?? null,
+                            'qty'          => $item->quantity,
+                            'price'        => $item->price,
+                            'total'        => $item->quantity * $item->price,
+                        ];
+                    }),
+                ];
+            });
+
         return response()->json([
-            'success' => false,
-            'message' => $validator->errors()->first(),
-        ], 422);
-    }
+            'success' => true,
+            'data'    => [
+                'id'        => $user->id,
+                'name'      => $user->name,
+                'phone'     => $user->phone,
 
-    $user = User::with('addresses')
-        ->where('phone', $request->phone)
-        ->where('role', 'user')
-        ->first();
-
-    if (! $user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'User not found',
-        ], 404);
-    }
-
-    // âœ… Load sales with sale items
-    $orders = Sale::with('items')
-        ->where('customer_id', $user->id)
-        ->latest()
-        ->get()
-        ->map(function ($sale) {
-
-            return [
-                'id'             => $sale->id,
-                'invoice_number' => $sale->invoice_number,
-                'grand_total'    => $sale->grand_total,
-                'payment_method' => $sale->payment_method,
-                'payment_status' => $sale->payment_status,
-                'date'           => $sale->created_at->format('Y-m-d'),
-
-                // ðŸ”¥ SALE ITEMS
-                'items' => $sale->items->map(function ($item) {
+                'addresses' => $user->addresses->map(function ($address) {
                     return [
-                        'id'         => $item->id,
-                        'product_id' => $item->product_id,
-                        'product_name' => $item->product_name ?? null,
-                        'qty'        => $item->quantity,
-                        'price'      => $item->price,
-                        'total'      => $item->quantity * $item->price,
+                        'id'           => $address->id,
+                        'address_line' => $address->address,
+                        'city'         => $address->city,
+                        'state'        => $address->state,
+                        'pincode'      => $address->pincode,
                     ];
                 }),
-            ];
-        });
 
-    return response()->json([
-        'success' => true,
-        'data'    => [
-            'id'        => $user->id,
-            'name'      => $user->name,
-            'phone'     => $user->phone,
-
-            'addresses' => $user->addresses->map(function ($address) {
-                return [
-                    'id'           => $address->id,
-                    'address_line' => $address->address,
-                    'city'         => $address->city,
-                    'state'        => $address->state,
-                    'pincode'      => $address->pincode,
-                ];
-            }),
-
-            'orders' => $orders,
-        ],
-    ]);
-}
+                'orders'    => $orders,
+            ],
+        ]);
+    }
 
 }

@@ -499,6 +499,37 @@ class ProductController extends Controller
         ]);
     }
 
+    public function posProductsSearch_old(Request $request)
+    {
+        $search = $request->search;
+
+        $products = Product::where('name', 'like', "%$search%")
+            ->select('id', 'name')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'data' => $products,
+        ]);
+    }
+
+   public function posProductsSearch(Request $request)
+{
+    $search = $request->search;
+
+    $products = Product::with([
+        'variants:id,product_id,name,price,stock'
+    ])
+    ->select('id','name','category_id')
+    ->where('name', 'like', "%{$search}%")
+    ->limit(20)
+    ->get();
+
+    return response()->json([
+        'data' => $products,
+    ]);
+}
+
     public function collection(Request $request)
     {
         $query = Product::query()

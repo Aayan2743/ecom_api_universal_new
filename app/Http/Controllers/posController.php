@@ -121,15 +121,15 @@ class posController extends Controller
 
             $address = $request->address_snapshot ?? [];
 
-                $addressSnapshot = [
-                    'name'    => $request->customer_name,
-                    'phone'   => $request->customer_phone,
-                    'address' => $address['address'] ?? null,
-                    'city'    => $address['city'] ?? null,
-                    'state'   => $address['state'] ?? null,
-                    'country' => $address['country'] ?? 'India',
-                    'pincode' => $address['pincode'] ?? null,
-                ];
+            $addressSnapshot  = [
+                'name'    => $request->customer_name,
+                'phone'   => $request->customer_phone,
+                'address' => $address['address'] ?? null,
+                'city'    => $address['city'] ?? null,
+                'state'   => $address['state'] ?? null,
+                'country' => $address['country'] ?? 'India',
+                'pincode' => $address['pincode'] ?? null,
+            ];
 
             // 🧾 Create Sale
             $sale = Sale::create([
@@ -296,116 +296,116 @@ class posController extends Controller
     }
 
     public function sendOrderOtp(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'customer_id'        => 'nullable|exists:users,id',
-        'customer_name'      => 'required|string',
-        'customer_phone'     => 'required|string',
+    {
+        $validator = Validator::make($request->all(), [
+            'customer_id'              => 'nullable|exists:users,id',
+            'customer_name'            => 'required|string',
+            'customer_phone'           => 'required|string',
 
-        'items'              => 'required|array|min:1',
-        'items.*.variant_id' => 'required|integer|exists:product_variant_combinations,id',
-        'items.*.qty'        => 'required|integer|min:1',
+            'items'                    => 'required|array|min:1',
+            'items.*.variant_id'       => 'required|integer|exists:product_variant_combinations,id',
+            'items.*.qty'              => 'required|integer|min:1',
 
-        'address_snapshot'         => 'nullable|array',
-        'address_snapshot.address' => 'nullable|string',
-        'address_snapshot.city'    => 'nullable|string',
-        'address_snapshot.state'   => 'nullable|string',
-        'address_snapshot.pincode' => 'nullable|string',
-    ]);
+            'address_snapshot'         => 'nullable|array',
+            'address_snapshot.address' => 'nullable|string',
+            'address_snapshot.city'    => 'nullable|string',
+            'address_snapshot.state'   => 'nullable|string',
+            'address_snapshot.pincode' => 'nullable|string',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'errors'  => $validator->errors()->first(),
-        ], 422);
-    }
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors()->first(),
+            ], 422);
+        }
 
-    $itemsFormatted = [];
-    $subtotal = 0;
+        $itemsFormatted = [];
+        $subtotal       = 0;
 
-    foreach ($request->items as $item) {
+        foreach ($request->items as $item) {
 
-        $variant = ProductVariantCombination::with('product')
-            ->findOrFail($item['variant_id']);
+            $variant = ProductVariantCombination::with('product')
+                ->findOrFail($item['variant_id']);
 
-        $price     = $variant->extra_price;
-        $qty       = $item['qty'];
-        $lineTotal = $price * $qty;
+            $price     = $variant->extra_price;
+            $qty       = $item['qty'];
+            $lineTotal = $price * $qty;
 
-        $subtotal += $lineTotal;
+            $subtotal += $lineTotal;
 
-        $itemsFormatted[] = [
-            'product_name' => $variant->product->name,
-            'variant_name' => $variant->sku,
-            'price'        => $price,
-            'qty'          => $qty,
-            'total'        => $lineTotal,
-        ];
-    }
+            $itemsFormatted[] = [
+                'product_name' => $variant->product->name,
+                'variant_name' => $variant->sku,
+                'price'        => $price,
+                'qty'          => $qty,
+                'total'        => $lineTotal,
+            ];
+        }
 
-    $grandTotal = $subtotal;
+        $grandTotal = $subtotal;
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | Order Snapshot
     |--------------------------------------------------------------------------
     */
 
-    $snapshot = [
-        'customer_name'  => $request->customer_name,
-        'customer_phone' => $request->customer_phone,
-        'items'          => $itemsFormatted,
-        'subtotal'       => $subtotal,
-        'discount'       => 0,
-        'grand_total'    => $grandTotal,
-    ];
+        $snapshot = [
+            'customer_name'  => $request->customer_name,
+            'customer_phone' => $request->customer_phone,
+            'items'          => $itemsFormatted,
+            'subtotal'       => $subtotal,
+            'discount'       => 0,
+            'grand_total'    => $grandTotal,
+        ];
 
-    // Add address only if provided
-    if ($request->filled('address_snapshot')) {
-        $snapshot['address_snapshot'] = $request->address_snapshot;
-    }
+        // Add address only if provided
+        if ($request->filled('address_snapshot')) {
+            $snapshot['address_snapshot'] = $request->address_snapshot;
+        }
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | Generate OTP
     |--------------------------------------------------------------------------
     */
 
-    $otp = rand(100000, 999999);
+        $otp = rand(100000, 999999);
 
-    $pending = PendingSale::create([
-        'customer_id'    => $request->customer_id,
-        'order_snapshot' => $snapshot,
-        'otp'            => $otp,
-        'expires_at'     => Carbon::now()->addMinutes(5),
-    ]);
+        $pending = PendingSale::create([
+            'customer_id'    => $request->customer_id,
+            'order_snapshot' => $snapshot,
+            'otp'            => $otp,
+            'expires_at'     => Carbon::now()->addMinutes(5),
+        ]);
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | Format WhatsApp Message
     |--------------------------------------------------------------------------
     */
 
-    $message = $this->formatOrderMessage($snapshot, $otp);
+        $message = $this->formatOrderMessage($snapshot, $otp);
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | Send WhatsApp
     |--------------------------------------------------------------------------
     */
 
-    $response = $this->messenger->send(
-        $request->customer_phone,
-        $message
-    );
+        $response = $this->messenger->send(
+            $request->customer_phone,
+            $message
+        );
 
-    return response()->json([
-        'success'    => true,
-        'message'    => 'OTP sent successfully',
-        'pending_id' => $pending->id,
-        'response'   => $response,
-    ]);
-}
+        return response()->json([
+            'success'    => true,
+            'message'    => 'OTP sent successfully',
+            'pending_id' => $pending->id,
+            'response'   => $response,
+        ]);
+    }
 
     private function formatOrderMessage_w($snapshot, $otp)
     {
@@ -435,61 +435,60 @@ class posController extends Controller
         return $message;
     }
 
-
     private function formatOrderMessage($snapshot, $otp)
-{
-    $message = "🛒 *Order Summary*\n\n";
+    {
+        $message = "🛒 *Order Summary*\n\n";
 
-    $message .= "👤 Customer: ".$snapshot['customer_name']."\n";
-    $message .= "📞 Phone: ".$snapshot['customer_phone']."\n\n";
+        $message .= "👤 Customer: " . $snapshot['customer_name'] . "\n";
+        $message .= "📞 Phone: " . $snapshot['customer_phone'] . "\n\n";
 
-    $message .= "*Items*\n";
+        $message .= "*Items*\n";
 
-    foreach ($snapshot['items'] as $item) {
+        foreach ($snapshot['items'] as $item) {
 
-        $message .= "• ".$item['product_name'];
-        $message .= " (".$item['variant_name'].")";
-        $message .= " x ".$item['qty'];
-        $message .= " = ₹".$item['total']."\n";
-    }
+            $message .= "• " . $item['product_name'];
+            $message .= " (" . $item['variant_name'] . ")";
+            $message .= " x " . $item['qty'];
+            $message .= " = ₹" . $item['total'] . "\n";
+        }
 
-    $message .= "\nSubtotal: ₹".$snapshot['subtotal'];
-    $message .= "\nGrand Total: ₹".$snapshot['grand_total']."\n";
+        $message .= "\nSubtotal: ₹" . $snapshot['subtotal'];
+        $message .= "\nGrand Total: ₹" . $snapshot['grand_total'] . "\n";
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | Optional Address
     |--------------------------------------------------------------------------
     */
 
-    $addr = $snapshot['address_snapshot'];
+        $addr = $snapshot['address_snapshot'];
 
-    if (!empty($addr)) {
+        if (! empty($addr)) {
 
-        $message .= "\n📍 *Delivery Address*\n";
+            $message .= "\n📍 *Delivery Address*\n";
 
-        if (!empty($addr['address'])) {
-            $message .= $addr['address']."\n";
+            if (! empty($addr['address'])) {
+                $message .= $addr['address'] . "\n";
+            }
+
+            if (! empty($addr['city'])) {
+                $message .= $addr['city'] . "\n";
+            }
+
+            if (! empty($addr['state'])) {
+                $message .= $addr['state'] . "\n";
+            }
+
+            if (! empty($addr['pincode'])) {
+                $message .= $addr['pincode'] . "\n";
+            }
         }
 
-        if (!empty($addr['city'])) {
-            $message .= $addr['city']."\n";
-        }
+        $message .= "\n🔐 *OTP*: " . $otp;
+        $message .= "\nValid for 5 minutes.";
 
-        if (!empty($addr['state'])) {
-            $message .= $addr['state']."\n";
-        }
-
-        if (!empty($addr['pincode'])) {
-            $message .= $addr['pincode']."\n";
-        }
+        return $message;
     }
-
-    $message .= "\n🔐 *OTP*: ".$otp;
-    $message .= "\nValid for 5 minutes.";
-
-    return $message;
-}
 
     public function verifyOrderOtp(Request $request)
     {
@@ -660,7 +659,8 @@ class posController extends Controller
     public function userDetails(Request $request)
     {
         $customers = User::withCount('sales') // total orders
-            ->withSum('sales', 'grand_total')     // total amount
+            ->where('role', 'user')
+            ->withSum('sales', 'grand_total') // total amount
             ->paginate(10);
 
         return response()->json([

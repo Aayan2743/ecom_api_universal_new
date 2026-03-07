@@ -39,17 +39,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/payment/create', [phonepaycontroller::class, 'create']);
 
-
 Route::get('/payment/status/{transactionId}',
     [phonepaycontroller::class, 'status']);
 
 Route::prefix('whatsapp')->group(function () {
-Route::post('/webhook',[WhatsAppController::class,'webhook']);
+    Route::post('/webhook', [WhatsAppController::class, 'webhook']);
 
     Route::post('/payment', [CartController::class, 'createPaymentLink']);
 
 });
-
 
 Route::prefix('auth')->group(function () {
 
@@ -167,6 +165,7 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     Route::post('create-product', [ProductController::class, 'store']);
     Route::post('update-product/{id}', [ProductController::class, 'update']);
     Route::delete('delete-product/{id}', [ProductController::class, 'destroy']);
+    Route::get('/pos-products-search', [ProductController::class, 'posProductsSearch']);
 
     Route::post('/product/bulk-upload', [ProductController::class, 'upload']);
 
@@ -273,28 +272,23 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     Route::get('/products-bulk-import/template', [ProductBulkImportController::class, 'downloadBulkTemplate']);
 
     Route::get(
-     '/product-variants',
-    [ProductBulkImportController::class,'productVariants']
-);
-Route::post(
-    '/bulk-product-variant-images',
-    [ProductBulkImportController::class, 'bulkProductVariantImages']
-);
+        '/product-variants',
+        [ProductBulkImportController::class, 'productVariants']
+    );
+    Route::post(
+        '/bulk-product-variant-images',
+        [ProductBulkImportController::class, 'bulkProductVariantImages']
+    );
 
-Route::delete(
-    '/delete-variant-image/{id}',
-    [ProductBulkImportController::class,'deleteVariantImage']
-);
+    Route::delete(
+        '/delete-variant-image/{id}',
+        [ProductBulkImportController::class, 'deleteVariantImage']
+    );
 
-
-Route::delete(
-    '/delete-product-image/{id}',
-    [ProductBulkImportController::class,'deleteProductImage']
-);
-
-
-
-
+    Route::delete(
+        '/delete-product-image/{id}',
+        [ProductBulkImportController::class, 'deleteProductImage']
+    );
 
 });
 
