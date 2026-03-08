@@ -5,8 +5,8 @@ use App\Models\Category;
 use App\Services\WebpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
@@ -148,61 +148,61 @@ class CategoryController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'name'      => 'required|string|max:255',
-        'parent_id' => 'nullable|exists:categories,id',
-        'image'     => 'nullable|image|max:2048',
+    {
+        $validator = Validator::make($request->all(), [
+            'name'      => 'required|string|max:255',
+            'parent_id' => 'nullable|exists:categories,id',
+            'image'     => 'nullable|image|max:5048',
 
-        // ✅ Check slug uniqueness
-        'name' => [
-            'required',
-            'string',
-            'max:255',
-            function ($attribute, $value, $fail) {
-                $slug = Str::slug($value);
+            // ✅ Check slug uniqueness
+            'name'      => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    $slug = Str::slug($value);
 
-                if (Category::where('slug', $slug)->exists()) {
-                    $fail('Category already exists.');
-                }
-            },
-        ],
-    ]);
+                    if (Category::where('slug', $slug)->exists()) {
+                        $fail('Category already exists.');
+                    }
+                },
+            ],
+        ]);
 
-    if ($validator->fails()) {
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $imageName = null;
+
+        if ($request->hasFile('image')) {
+
+            $file     = $request->file('image');
+            $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+            $imageName = time() . '_' . Str::slug($baseName) . '.webp';
+
+            $src  = $file->getPathname();
+            $dest = storage_path('app/public/categories/' . $imageName);
+
+            WebpService::convert($src, $dest, 60);
+        }
+
+        Category::create([
+            'name'      => $request->name,
+            'slug'      => Str::slug($request->name),
+            'parent_id' => $request->parent_id,
+            'image'     => $imageName,
+        ]);
+
         return response()->json([
-            'success' => false,
-            'message' => $validator->errors()->first(),
-        ], 422);
+            'success' => true,
+            'message' => 'Category created successfully',
+        ]);
     }
-
-    $imageName = null;
-
-    if ($request->hasFile('image')) {
-
-        $file     = $request->file('image');
-        $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-
-        $imageName = time() . '_' . Str::slug($baseName) . '.webp';
-
-        $src  = $file->getPathname();
-        $dest = storage_path('app/public/categories/' . $imageName);
-
-        WebpService::convert($src, $dest, 60);
-    }
-
-    Category::create([
-        'name'      => $request->name,
-        'slug'      => Str::slug($request->name),
-        'parent_id' => $request->parent_id,
-        'image'     => $imageName,
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Category created successfully',
-    ]);
-}
 
     /* ================= UPDATE CATEGORY ================= */
     public function updates(Request $request, $id)
@@ -263,68 +263,69 @@ class CategoryController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $category = Category::findOrFail($id);
+    {
 
-    $validator = Validator::make($request->all(), [
-        'name'      => 'required|string|max:255',
-        'parent_id' => 'nullable|exists:categories,id|not_in:' . $id,
-        'image'     => 'nullable|image|max:5   048',
-    ]);
+        $category = Category::findOrFail($id);
 
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'message' => $validator->errors()->first(),
-        ], 422);
-    }
+        $validator = Validator::make($request->all(), [
+            'name'      => 'required|string|max:255',
+            'parent_id' => 'nullable|exists:categories,id|not_in:' . $id,
+            'image'     => 'nullable|image|max:5048',
+        ]);
 
-    // ✅ Check duplicate slug (ignore current category)
-    $slug = Str::slug($request->name);
-
-    $exists = Category::where('slug', $slug)
-        ->where('id', '!=', $id)
-        ->exists();
-
-    if ($exists) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Category already exists.'
-        ], 422);
-    }
-
-    $imageName = $category->image;
-
-    if ($request->hasFile('image')) {
-
-        // delete old image
-        if ($category->image) {
-            Storage::disk('public')->delete('categories/' . $category->image);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+            ], 422);
         }
 
-        $file     = $request->file('image');
-        $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        // ✅ Check duplicate slug (ignore current category)
+        $slug = Str::slug($request->name);
 
-        $imageName = time() . '_' . Str::slug($baseName) . '.webp';
+        $exists = Category::where('slug', $slug)
+            ->where('id', '!=', $id)
+            ->exists();
 
-        $src  = $file->getPathname();
-        $dest = storage_path('app/public/categories/' . $imageName);
+        if ($exists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category already exists.',
+            ], 422);
+        }
 
-        WebpService::convert($src, $dest, 60);
+        $imageName = $category->image;
+
+        if ($request->hasFile('image')) {
+
+            // delete old image
+            if ($category->image) {
+                Storage::disk('public')->delete('categories/' . $category->image);
+            }
+
+            $file     = $request->file('image');
+            $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+            $imageName = time() . '_' . Str::slug($baseName) . '.webp';
+
+            $src  = $file->getPathname();
+            $dest = storage_path('app/public/categories/' . $imageName);
+
+            WebpService::convert($src, $dest, 60);
+        }
+
+        $category->update([
+            'name'      => $request->name,
+            'slug'      => $slug,
+            'parent_id' => $request->parent_id,
+            'image'     => $imageName,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category updated successfully',
+        ]);
     }
-
-    $category->update([
-        'name'      => $request->name,
-        'slug'      => $slug,
-        'parent_id' => $request->parent_id,
-        'image'     => $imageName,
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Category updated successfully',
-    ]);
-}
 
     /* ================= DELETE CATEGORY ================= */
     /* ================= DELETE CATEGORY ================= */
