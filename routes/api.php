@@ -92,7 +92,7 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     Route::get('/user-details', [AuthController::class, 'userDetails']);
     Route::get('/user-order-details', [posController::class, 'userDetails']);
     Route::get('/profile', [AuthController::class, 'profile']);
-    Route::post('/update-profile', [AuthController::class, 'updateProfile']);
+    Route::post('/update-profile', [AuthController::class, 'update']);
     Route::get('/app-logo-settings', [SettingController::class, 'show']);
     Route::post('/app-logo-settings', [SettingController::class, 'update']);
 

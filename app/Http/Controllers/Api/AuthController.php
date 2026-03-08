@@ -75,8 +75,6 @@ class AuthController extends Controller
         ]);
     }
 
-
-
     // User Registration
     public function register(Request $request)
     {
@@ -257,59 +255,59 @@ class AuthController extends Controller
     }
 
     public function admin_login(Request $request)
-{
+    {
 
-    $validator = Validator::make($request->all(), [
-        'username' => 'required|string', // email OR phone
-        'password' => 'required|string',
-    ]);
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string', // email OR phone
+            'password' => 'required|string',
+        ]);
 
-    if ($validator->fails()) {
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $loginField = filter_var($request->username, FILTER_VALIDATE_EMAIL)
+            ? 'email'
+            : 'phone';
+
+        $user = User::where($loginField, $request->username)->first();
+
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        // ✅ Allow admin and employee
+        if (! in_array($user->role, ['admin', 'employee'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Access denied',
+            ], 403);
+        }
+
+        // Password check
+        if (! Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ], 401);
+        }
+
+        // JWT Token
+        $token = JWTAuth::fromUser($user);
+
         return response()->json([
-            'success' => false,
-            'errors'  => $validator->errors()->first(),
-        ], 422);
+            'success'    => true,
+            'token'      => $token,
+            'token_type' => 'Bearer',
+            'user'       => $user,
+        ]);
     }
-
-    $loginField = filter_var($request->username, FILTER_VALIDATE_EMAIL)
-        ? 'email'
-        : 'phone';
-
-    $user = User::where($loginField, $request->username)->first();
-
-    if (!$user) {
-        return response()->json([
-            'success' => false,
-            'message' => 'User not found',
-        ], 404);
-    }
-
-    // ✅ Allow admin and employee
-    if (!in_array($user->role, ['admin','employee'])) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Access denied',
-        ], 403);
-    }
-
-    // Password check
-    if (!Hash::check($request->password, $user->password)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid credentials',
-        ], 401);
-    }
-
-    // JWT Token
-    $token = JWTAuth::fromUser($user);
-
-    return response()->json([
-        'success'    => true,
-        'token'      => $token,
-        'token_type' => 'Bearer',
-        'user'       => $user,
-    ]);
-}
 
     public function super_admin_login(Request $request)
     {
@@ -465,21 +463,36 @@ class AuthController extends Controller
 
     public function profile()
     {
+
+        // return response()->json([
+        //     'success' => true,
+        //     'user'    => Auth::user(),
+        // ]);
+
+        $user = Auth::user();
+
+        if ($user->avatar) {
+            $user->avatar = asset('storage/' . $user->avatar);
+        } else {
+            $user->avatar = asset('assets/images/avatar/default.png');
+        }
+
         return response()->json([
             'success' => true,
-            'user'    => Auth::user(),
+            'user'    => $user,
         ]);
     }
 
     public function update(Request $request)
     {
+
         $user = $request->user();
 
         /* ================= VALIDATION ================= */
         $validator = Validator::make($request->all(), [
-            'name'          => 'required|string|max:255',
-            'email'         => 'nullable|email|max:255|unique:users,email,' . $user->id,
-            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'name'   => 'required|string|max:255',
+            'email'  => 'nullable|email|max:255|unique:users,email,' . $user->id,
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
         if ($validator->fails()) {
@@ -494,9 +507,9 @@ class AuthController extends Controller
         $user->email = $request->email ?? $user->email;
 
         /* ================= IMAGE → WEBP ================= */
-        if ($request->hasFile('profile_image')) {
+        if ($request->hasFile('avatar')) {
 
-            $file = $request->file('profile_image');
+            $file = $request->file('avatar');
 
             // 👉 temp source path
             $srcPath = $file->getRealPath();
