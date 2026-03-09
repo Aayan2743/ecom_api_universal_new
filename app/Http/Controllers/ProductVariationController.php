@@ -3,7 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ProductVariation;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class ProductVariationController extends Controller
 {
@@ -26,45 +26,45 @@ class ProductVariationController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:text,color',
-        ]);
+  public function store(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255|unique:product_variations,name',
+        'type' => 'required|in:text,color',
+    ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $variation = ProductVariation::create($validator->validated());
-
-        return response()->json([
-            'success' => true,
-            'data'    => $variation,
-        ]);
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()->first()], 422);
     }
 
-    public function update(Request $request, $id)
-    {
-        $variation = ProductVariation::findOrFail($id);
+    $variation = ProductVariation::create($validator->validated());
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'type' => 'required|in:text,color',
-        ]);
+    return response()->json([
+        'success' => true,
+        'data'    => $variation,
+    ]);
+}
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+  public function update(Request $request, $id)
+{
+    $variation = ProductVariation::findOrFail($id);
 
-        $variation->update($validator->validated());
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255|unique:product_variations,name,' . $id,
+        'type' => 'required|in:text,color',
+    ]);
 
-        return response()->json([
-            'success' => true,
-            'data'    => $variation,
-        ]);
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()->first()], 422);
     }
+
+    $variation->update($validator->validated());
+
+    return response()->json([
+        'success' => true,
+        'data'    => $variation,
+    ]);
+}
 
     public function destroy($id)
     {

@@ -41,7 +41,7 @@ return [
         'base_url' => env('SHIPROCKET_BASE_URL'),
     ],
     'whatsapp'               => [
-        'enabled'  => env('WHATSAPP_ENABLED', false),
+        'enabled'  => env('WHATSAPP_ENABLED', true),
         'api_key'  => env('WHATSAPP_API_KEY'),
         'base_url' => env('WHATSAPP_BASE_URL'),
     ],

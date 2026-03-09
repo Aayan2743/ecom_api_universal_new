@@ -44,6 +44,17 @@ Route::get('/payment/status/{transactionId}',
 
 Route::post('/webhook', [CartController::class, 'razorpayWebhook']);
 
+
+Route::get('/test-whatsapp', function(App\Services\Messenger360Service $messenger){
+
+    $response = $messenger->send(
+        "918919273834",
+        "Test message from Laravel"
+    );
+
+    return $response;
+});
+
 Route::prefix('whatsapp')->group(function () {
     Route::post('/webhook', [WhatsAppController::class, 'webhook']);
 
