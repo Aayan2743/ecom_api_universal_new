@@ -416,8 +416,10 @@ class ProductController extends Controller
         ]);
     }
 
-    public function posProducts(Request $request)
+    public function posProducts_workinf(Request $request)
     {
+
+
         $category = $request->category;
 
         $products = Product::with([
@@ -457,6 +459,59 @@ class ProductController extends Controller
             }),
         ]);
     }
+
+    public function posProducts(Request $request)
+{
+    $category = $request->category;
+
+    $products = Product::with([
+        'images',
+        'variantCombinations.images',
+        'variantCombinations.values' // ✅ load variation values
+    ])
+    ->when($category !== 'all', function ($q) use ($category) {
+        $q->where('category_id', $category);
+    })
+    ->where('status', 'Published')
+    ->get();
+
+    return response()->json([
+        'data' => $products->map(function ($p) {
+
+            return [
+                'id'        => $p->id,
+                'name'      => $p->name,
+
+                'image_url' => optional($p->images->first())->image_path
+                    ? asset('storage/' . $p->images->first()->image_path)
+                    : null,
+
+                'variants'  => $p->variantCombinations->map(function ($v) {
+
+                    // ✅ build variation name (500 g / 1 kg etc)
+                    $variationName = $v->values->pluck('value')->implode(' / ');
+
+                    return [
+                        'id'    => $v->id,
+
+                        // 🔥 frontend already uses variant.name
+                        'name'  => $variationName ?: $v->sku,
+
+                        'price' => $v->extra_price,
+                        'stock' => $v->quantity,
+
+                        'images' => $v->images->map(function ($img) {
+                            return [
+                                'id'        => $img->id,
+                                'image_url' => asset('storage/' . $img->image_path),
+                            ];
+                        }),
+                    ];
+                }),
+            ];
+        }),
+    ]);
+}
 
     public function collectionssss(Request $request)
     {
