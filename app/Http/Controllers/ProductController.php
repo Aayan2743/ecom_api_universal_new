@@ -16,30 +16,43 @@ class ProductController extends Controller
         $search  = $request->search;
         $perPage = $request->perPage ?? 10;
 
-        // $products = Product::with([
-        //     'category:id,name,parent_id',
-        //     'category.parent:id,name',
-        //     'brand:id,name',
-        //     'images:id,product_id,image_path,is_primary',
-        // ])
+
+
+        // $products = Product::query()
+        //     ->whereNull('deleted_at') // explicit (optional but clean)
+        //     ->with([
+        //         'category:id,name,parent_id',
+        //         'category.parent:id,name',
+        //         'brand:id,name',
+        //         'images:id,product_id,image_path,is_primary',
+        //         'sections:id,name,slug',
+        //     ])
         //     ->withMin('variantCombinations as min_price', 'extra_price')
         //     ->withMin('variantCombinations as min_discount', 'discount')
         //     ->orderBy('id', 'desc')
         //     ->paginate($perPage);
 
         $products = Product::query()
-            ->whereNull('deleted_at') // explicit (optional but clean)
-            ->with([
-                'category:id,name,parent_id',
-                'category.parent:id,name',
-                'brand:id,name',
-                'images:id,product_id,image_path,is_primary',
-                'sections:id,name,slug',
-            ])
-            ->withMin('variantCombinations as min_price', 'extra_price')
-            ->withMin('variantCombinations as min_discount', 'discount')
-            ->orderBy('id', 'desc')
-            ->paginate($perPage);
+    ->whereNull('deleted_at')
+
+    ->when($search, function ($q) use ($search) {
+        $q->where(function ($sub) use ($search) {
+            $sub->where('name', 'like', "%{$search}%")
+                ->orWhere('slug', 'like', "%{$search}%");
+        });
+    })
+
+    ->with([
+        'category:id,name,parent_id',
+        'category.parent:id,name',
+        'brand:id,name',
+        'images:id,product_id,image_path,is_primary',
+        'sections:id,name,slug',
+    ])
+    ->withMin('variantCombinations as min_price', 'extra_price')
+    ->withMin('variantCombinations as min_discount', 'discount')
+    ->orderBy('id', 'desc')
+    ->paginate($perPage);
 
         return response()->json([
             'data'       => $products->getCollection()->map(fn($p) => [

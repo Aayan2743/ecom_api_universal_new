@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductBarcode;
 use App\Models\ProductVariantCombination;
 use App\Models\ProductVariantCombinationValue;
 use App\Models\ProductVariantImage;
@@ -15,8 +16,40 @@ use Illuminate\Support\Str;
 class ProductVariantController extends Controller
 {
 
+
+private function generateEAN13()
+{
+    do {
+
+        // 12 digit base number
+        $base = '89' . str_pad(mt_rand(0, 9999999999), 10, '0', STR_PAD_LEFT);
+
+        $digits = str_split($base);
+        $odd = 0;
+        $even = 0;
+
+        foreach ($digits as $index => $digit) {
+
+            if (($index + 1) % 2 == 0) {
+                $even += $digit;
+            } else {
+                $odd += $digit;
+            }
+        }
+
+        $total = $odd + ($even * 3);
+        $checksum = (10 - ($total % 10)) % 10;
+
+        $ean13 = $base . $checksum;
+
+    } while (\App\Models\ProductBarcode::where('barcode', $ean13)->exists());
+
+    return $ean13;
+}
+
     public function store(Request $request, Product $product)
     {
+
         // ✅ FIX: Decode variants JSON when sent via FormData
         if ($request->has('variants') && is_string($request->variants)) {
             $request->merge([
@@ -69,6 +102,19 @@ class ProductVariantController extends Controller
                         'variation_value_id'     => $valueId,
                     ]);
                 }
+
+                $qty = $variant['quantity'] ?? 0;
+
+                    for ($i = 1; $i <= $qty; $i++) {
+
+                        $barcode = $this->generateEAN13();
+
+                        ProductBarcode::create([
+                            'variant_id' => $combo->id,
+                            'barcode'    => $barcode,
+                            'is_used'    => 0
+                        ]);
+                    }
 
                 // ✅ Variant Images
                 if ($request->hasFile("variant_images.$index")) {

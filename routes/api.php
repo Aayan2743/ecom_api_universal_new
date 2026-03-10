@@ -36,6 +36,7 @@ use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\WhatsappSettingController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductBarcodeController;
 
 Route::post('/payment/create', [phonepaycontroller::class, 'create']);
 
@@ -195,6 +196,10 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     // product variant routes
     Route::post('product/create-variation/{product}', [ProductVariantController::class, 'store']);
     Route::post('product/update-variation/{product}', [ProductVariantController::class, 'syncVariations']);
+    Route::get('product/generate-old-barcodes',[ProductBarcodeController::class,'generateOldBarcodes']);
+
+    Route::get('product/print-barcode/{variantId}', [ProductBarcodeController::class,'printBarcodes']);
+    Route::get('product/product-by-barcode/{barcode}', [ProductBarcodeController::class,'productByBarcode']);
 
 // Product SEO Meta Management
 

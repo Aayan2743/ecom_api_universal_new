@@ -126,7 +126,8 @@ public function productVariants(Request $request)
         'product.images',   // 🔥 product images
         'product',
         'values',
-        'images'
+        'images',
+        'barcodes'
     ])
     ->whereHas('product')
     ->when($search, function ($q) use ($search) {
@@ -141,6 +142,7 @@ public function productVariants(Request $request)
 
         return [
             'id' => $variant->id,
+            'qty' => $variant->quantity,
 
             'product_id' => $variant->product->id,
 
@@ -171,6 +173,12 @@ public function productVariants(Request $request)
                         'url' => asset('storage/'.$img->image_path)
                     ];
                 })->values(),
+
+                'barcodes' => $variant->barcodes
+                 ->take($variant->quantity)
+    ->pluck('barcode')
+
+    ->values(),
 
         ];
     });

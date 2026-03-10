@@ -15,6 +15,17 @@ class ProductVariantCombination extends Model
     {
         return $this->belongsTo(Product::class);
     }
+//     public function barcodes()
+// {
+//     return $this->hasMany(ProductBarcode::class, 'variant_id')->where('is_used', false);;
+// }
+
+public function barcodes()
+{
+    return $this->hasMany(ProductBarcode::class, 'variant_id')
+        ->where('is_used', false);
+        // ->limit($this->quantity);
+}
 
     // public function values()
     // {

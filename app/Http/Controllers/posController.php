@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PendingSale;
 use App\Models\Product;
+use App\Models\ProductBarcode;
 use App\Models\ProductVariantCombination;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -12,6 +13,7 @@ use App\Services\Shiprocket\ShiprocketOrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class posController extends Controller
@@ -46,6 +48,9 @@ class posController extends Controller
             'items.*.product_id'       => 'required|integer|exists:products,id',
             'items.*.variant_id'       => 'required|integer|exists:product_variant_combinations,id',
             'items.*.qty'              => 'required|integer|min:1',
+
+            'items.*.barcode_id'       => 'nullable|exists:product_barcodes,id',
+
         ]);
 
         if ($validator->fails()) {
@@ -152,35 +157,99 @@ class posController extends Controller
             ]);
 
             // 🧾 Save Sale Items + Deduct Stock
-            foreach ($itemsData as $data) {
+            // foreach ($itemsData as $data) {
 
-                $variant = $data['variant'];
+            //     $variant = $data['variant'];
 
-                SaleItem::create([
-                    'sale_id'                => $sale->id,
+            //     SaleItem::create([
+            //         'sale_id'                => $sale->id,
 
-                    'product_id'             => $variant->product->id,
-                    'variant_combination_id' => $variant->id,
+            //         'product_id'             => $variant->product->id,
+            //         'variant_combination_id' => $variant->id,
 
-                    'product_name'           => $variant->product->name,
-                    'variant_name'           => $variant->sku,
-                    'sku'                    => $variant->sku,
+            //         'product_name'           => $variant->product->name,
+            //         'variant_name'           => $variant->sku,
+            //         'sku'                    => $variant->sku,
 
-                    'product_image'          => optional($variant->images->first())->image_path
-                        ? asset('storage/' . $variant->images->first()->image_path)
-                        : null,
+            //         'product_image'          => optional($variant->images->first())->image_path
+            //             ? asset('storage/' . $variant->images->first()->image_path)
+            //             : null,
 
-                    'price'                  => $data['price'],
-                    'discount'               => $data['discount'],
-                    'tax'                    => $data['tax'],
+            //         'price'                  => $data['price'],
+            //         'discount'               => $data['discount'],
+            //         'tax'                    => $data['tax'],
 
-                    'quantity'               => $data['qty'],
-                    'total'                  => $data['total'],
-                ]);
+            //         'quantity'               => $data['qty'],
+            //         'total'                  => $data['total'],
+            //     ]);
 
-                // 🔥 Deduct Stock
-                $variant->decrement('quantity', $data['qty']);
-            }
+            //     // 🔥 Deduct Stock
+            //     $variant->decrement('quantity', $data['qty']);
+            // }
+
+
+
+            foreach ($itemsData as $index => $data) {
+
+    $variant = $data['variant'];
+
+    SaleItem::create([
+        'sale_id'                => $sale->id,
+        'product_id'             => $variant->product->id,
+        'variant_combination_id' => $variant->id,
+        'product_name'           => $variant->product->name,
+        'variant_name'           => $variant->sku,
+        'sku'                    => $variant->sku,
+
+        'product_image'          => optional($variant->images->first())->image_path
+            ? asset('storage/' . $variant->images->first()->image_path)
+            : null,
+
+        'price'                  => $data['price'],
+        'discount'               => $data['discount'],
+        'tax'                    => $data['tax'],
+        'quantity'               => $data['qty'],
+        'total'                  => $data['total'],
+    ]);
+
+    // Deduct Stock
+    $variant->decrement('quantity', $data['qty']);
+
+    $barcodeId = $request->items[$index]['barcode_id'] ?? null;
+
+    /*
+    |--------------------------------------------------------------------------
+    | CASE 1 : Barcode Scanned
+    |--------------------------------------------------------------------------
+    */
+
+    if ($barcodeId) {
+
+        ProductBarcode::where('id', $barcodeId)
+            ->where('is_used', false)
+            ->update([
+                'is_used' => true,
+                // 'used_at' => now()
+            ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CASE 2 : Manual Add (No Barcode)
+    |--------------------------------------------------------------------------
+    */
+
+    else {
+
+        ProductBarcode::where('variant_id', $variant->id)
+            ->where('is_used', false)
+            ->limit($data['qty'])
+            ->update([
+                'is_used' => true,
+                // 'used_at' => now()
+            ]);
+    }
+}
 
             DB::commit();
 
@@ -193,6 +262,44 @@ class posController extends Controller
             //         'grand_total'    => $sale->grand_total,
             //     ],
             // ]);
+
+
+            try {
+
+    if ($request->customer_phone) {
+
+        // $phone = '91' . ltrim($request->customer_phone, '0');
+        $phone = $request->customer_phone;
+
+        $message  = "🧾 *Order Invoice*\n";
+        $message .= "Invoice: {$sale->invoice_number}\n\n";
+
+        $message .= "📦 *Items*\n";
+
+        foreach ($sale->items as $item) {
+
+            $message .= "• {$item->product_name}\n";
+            $message .= "Qty: {$item->quantity}\n";
+            $message .= "Price: ₹{$item->price}\n";
+            $message .= "Total: ₹{$item->total}\n\n";
+
+        }
+
+        $message .= "Subtotal: ₹{$sale->subtotal}\n";
+        $message .= "Tax: ₹{$sale->tax_total}\n";
+        $message .= "*Grand Total: ₹{$sale->grand_total}*\n\n";
+
+        $message .= "🙏 *Thank you for visiting Sri Devi Herbals*\n";
+        $message .= "🌿 Welcome again!";
+
+        $this->messenger->send($phone, $message);
+    }
+
+} catch (\Exception $e) {
+
+    Log::error("WhatsApp send failed: ".$e->getMessage());
+
+}
 
             return response()->json([
                 'success' => true,
@@ -424,6 +531,7 @@ class posController extends Controller
             'success'    => true,
             'message'    => 'OTP sent successfully',
             'pending_id' => $pending->id,
+                'otp'        => $pending->otp,
             'response'   => $response,
         ]);
     }
