@@ -38,6 +38,14 @@ use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductBarcodeController;
 
+
+
+
+
+// this is use for whatsapp payment link creation and webhook handling
+Route::get('/payment-success/{linkid}', [WhatsAppController::class,'checkPayment']);
+
+
 Route::post('/payment/create', [phonepaycontroller::class, 'create']);
 
 Route::get('/payment/status/{transactionId}',

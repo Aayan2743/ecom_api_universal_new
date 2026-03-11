@@ -410,7 +410,7 @@ public function printBarcodes($variantId)
 
     $qty      = $variant->values->pluck('value')->join('/');
     $actual   = $variant->extra_price;
-    $discount = $variant->purchase_price - $variant->discount ;
+    $discount = $variant->extra_price - $variant->discount ;
 
     // get all barcodes
     // $barcodes = $variant->barcodes->pluck('barcode')->toArray();

@@ -127,4 +127,50 @@ class Messenger360Service
             'raw'     => $response,
         ];
     }
+
+
+public function sendButtons($phone,$text,$buttons)
+{
+    $payload = [
+        "phonenumber" => $phone,
+        "type" => "interactive",
+        "interactive" => [
+            "type" => "button",
+            "body" => [
+                "text" => $text
+            ],
+            "action" => [
+                "buttons" => []
+            ]
+        ]
+    ];
+
+    foreach($buttons as $btn){
+        $payload["interactive"]["action"]["buttons"][] = [
+            "type" => "reply",
+            "reply" => [
+                "id" => $btn["id"],
+                "title" => $btn["text"]
+            ]
+        ];
+    }
+
+    $ch = curl_init();
+
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $this->url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_HTTPHEADER => [
+            "Authorization: Bearer ".$this->token,
+            "Content-Type: application/json"
+        ]
+    ]);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    return json_decode($response,true);
+}
 }

@@ -10,4 +10,8 @@ class ChatSession extends Model
 
     ];
 
+    protected $casts = [
+    'data' => 'array',
+];
+
 }
