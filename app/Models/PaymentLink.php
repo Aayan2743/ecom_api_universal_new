@@ -13,5 +13,7 @@ class PaymentLink extends Model
         'customer_phone',
         'status',
         'paid_at',
+        'variant_id',
+        'address_id',
     ];
 }

@@ -11,94 +11,9 @@ use Illuminate\Support\Facades\Validator;
 class OrderController extends Controller
 {
 
-    public function sendWhatsappTest()
-    {
-        try {
-            $whatsapp = new Messenger360Service();
 
-            $res = $whatsapp->send(
-                '8919273834',
-                'Hello World!',
-                // 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Example',
-                // '01-12-2025 09:29' // optional, GMT
-            );
 
-            return response()->json([
-                'success'  => true,
-                'response' => $res,
-            ]);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    public function store_w(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            // 'user_id'                     => 'required|exists:users,id',
-            'address_id'                  => 'required|exists:addresses,id',
-
-            'payment.method'              => 'required|string',
-            'payment.razorpay_order_id'   => 'nullable|string',
-            'payment.razorpay_payment_id' => 'nullable|string',
-            'payment.amount'              => 'required|numeric|min:1',
-
-            'price_details.subtotal'      => 'required|numeric|min:1',
-            'price_details.discount'      => 'nullable|numeric|min:0',
-            'price_details.coupon_code'   => 'nullable|string',
-            'price_details.total_amount'  => 'required|numeric|min:1',
-
-            'items'                       => 'required|array|min:1',
-            'items.*.product_id'          => 'required|exists:products,id',
-            'items.*.quantity'            => 'required|integer|min:1',
-            'items.*.price'               => 'required|numeric|min:1',
-            'items.*.total'               => 'required|numeric|min:1',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors()->first(),
-            ], 422);
-        }
-
-        $user_id = auth()->user()->id;
-
-        // ✅ Create Order
-        $order = Order::create([
-            'user_id'             => $user_id,
-            'address_id'          => $request->address_id,
-            'payment_method'      => $request->payment['method'],
-            'razorpay_order_id'   => $request->payment['razorpay_order_id'] ?? null,
-            'razorpay_payment_id' => $request->payment['razorpay_payment_id'] ?? null,
-            'subtotal'            => $request->price_details['subtotal'],
-            'discount'            => $request->price_details['discount'] ?? 0,
-            'coupon_code'         => $request->price_details['coupon_code'],
-            'total_amount'        => $request->price_details['total_amount'],
-            'status'              => 'paid',
-        ]);
-
-        // ✅ Save Order Items
-        foreach ($request->items as $item) {
-            OrderItem::create([
-                'order_id'   => $order->id,
-                'product_id' => $item['product_id'],
-                'quantity'   => $item['quantity'],
-                'price'      => $item['price'],
-                'total'      => $item['total'],
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Order created successfully',
-            'data'    => $order->load('items'),
-        ]);
-    }
 
     public function store(Request $request)
     {
@@ -387,7 +302,7 @@ class OrderController extends Controller
 
 /* ================= SHOW ORDER ================= */
 
-    public function show($id)
+    public function show_old($id)
     {
         $order = Order::with([
             'items.product.images', // 👈 THIS is the key line
@@ -462,39 +377,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function allorders_w(Request $request)
-    {
-        $search  = $request->search;
-        $perPage = $request->perPage ?? 10;
 
-        $orders = Order::with([
-            'items.product.images',
-            'user:id,name,phone,email',
-        ])
-            ->when($search, function ($q) use ($search) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhereHas('items.product', function ($p) use ($search) {
-                        $p->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('user', function ($u) use ($search) {
-                        $u->where('name', 'like', "%{$search}%")
-                            ->orWhere('phone', 'like', "%{$search}%");
-                    });
-            })
-            ->latest()
-            ->paginate($perPage);
-
-        return response()->json([
-            'success'    => true,
-            'data'       => $orders->items(),
-            'pagination' => [
-                'total'       => $orders->total(),
-                'currentPage' => $orders->currentPage(),
-                'totalPages'  => $orders->lastPage(),
-                'perPage'     => $orders->perPage(),
-            ],
-        ]);
-    }
 
     public function allorders(Request $request)
     {
@@ -536,6 +419,47 @@ class OrderController extends Controller
         ]);
     }
 
+    public function stats()
+{
+    return response()->json([
+        "success" => true,
+        "data" => [
+            "totalOrders" => Order::count(),
+            "totalRevenue" => Order::sum('total_amount'),
+            "pendingOrders" => Order::where('status','placed')->count(),
+            "completedOrders" => Order::where('status','completed')->count(),
+        ]
+    ]);
+}
+
+public function updateStatus(Request $request, $id)
+{
+    $order = Order::findOrFail($id);
+
+    $order->update([
+        'status' => $request->order_status
+    ]);
+
+    return response()->json([
+        "success"=>true
+    ]);
+}
+
+public function statusCounts()
+{
+    return response()->json([
+        "success" => true,
+        "data" => [
+            "all" => Order::count(),
+            "bill_sent" => Order::where('status','bill_sent')->count(),
+            "ready" => Order::where('status','ready')->count(),
+            "in_transit" => Order::where('status','in_transit')->count(),
+            "completed" => Order::where('status','completed')->count(),
+            "others" => Order::whereNotIn('status',['bill_sent','ready','in_transit','completed'])->count()
+        ]
+    ]);
+}
+
     public function allorders_show($id)
     {
         $order = Order::with([
@@ -556,6 +480,43 @@ class OrderController extends Controller
             'data'    => $order,
         ]);
     }
+
+
+    public function show($id)
+{
+    $order = Order::with([
+        'items.product.images',
+        'user:id,name,phone,email',
+        'address:id,name,phone,address,city,state,pincode'
+    ])->find($id);
+
+    if(!$order){
+        return response()->json([
+            'success' => false,
+            'message' => 'Order not found'
+        ],404);
+    }
+
+    // add full image url
+    $order->items->each(function($item){
+
+        if($item->product && $item->product->images){
+
+            $item->product->images->each(function($img){
+
+                $img->image_url = asset('storage/'.$img->image_path);
+
+            });
+
+        }
+
+    });
+
+    return response()->json([
+        'success' => true,
+        'data' => $order
+    ]);
+}
 
     public function updateStatusRequest($request, $id)
     {
@@ -581,5 +542,71 @@ class OrderController extends Controller
             'message' => 'Order status updated',
         ]);
     }
+
+
+    public function dashboardOrders(Request $request)
+{
+    $search  = $request->search;
+    $perPage = $request->perPage ?? 10;
+
+    $orders = Order::with([
+        'items.product:id,name',
+        'user:id,name,phone',
+    ])
+    ->when($search, function ($q) use ($search) {
+        $q->where('id', 'like', "%{$search}%")
+          ->orWhereHas('user', function ($u) use ($search) {
+              $u->where('name','like',"%{$search}%")
+                ->orWhere('phone','like',"%{$search}%");
+          });
+    })
+    ->latest()
+    ->paginate($perPage);
+
+    $formatted = $orders->getCollection()->map(function ($order) {
+
+        return [
+            'id'            => $order->id,
+            'order_id'      => "ORD-".$order->id,
+            'contact'       => $order->user?->phone,
+            'date'          => $order->created_at->format('d M Y'),
+
+            'amount'        => $order->total_amount,
+
+            'order_type'    => $order->payment_method === 'cod'
+                                ? 'COD'
+                                : 'Prepaid',
+
+            'order_status'  => $order->shipment_status ?? 'Pending',
+
+            'items'         => $order->items->count(),
+
+            'payment_mode'  => $order->payment_method,
+
+            'payment_status'=> $order->status,
+        ];
+    });
+
+    return response()->json([
+        'success' => true,
+        'data'    => $formatted,
+        'pagination' => [
+            'total'       => $orders->total(),
+            'currentPage' => $orders->currentPage(),
+            'totalPages'  => $orders->lastPage(),
+            'perPage'     => $orders->perPage(),
+        ],
+    ]);
+}
+
+public function dashboardStats()
+{
+    return response()->json([
+        'total_orders' => Order::count(),
+        'total_revenue'=> Order::sum('total_amount'),
+        'pending_orders'=> Order::where('shipment_status','pending')->count(),
+        'completed_orders'=> Order::where('shipment_status','delivered')->count(),
+    ]);
+}
 
 }

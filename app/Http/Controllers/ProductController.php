@@ -497,7 +497,7 @@ class ProductController extends Controller
                         // 🔥 frontend already uses variant.name
                         'name'  => $variationName ?: $v->sku,
 
-                        'price' => $v->extra_price,
+                        'price' => $v->extra_price-$v->discount,
                         'stock' => $v->quantity,
 
                         'images' => $v->images->map(function ($img) {

@@ -298,7 +298,7 @@ class CartController extends Controller
         }
     }
 
-    public function checkPaymentLink(Request $request)
+        public function checkPaymentLink(Request $request)
     {
         try {
 

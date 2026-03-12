@@ -43,6 +43,7 @@ return [
     'whatsapp'               => [
         'enabled'  => env('WHATSAPP_ENABLED', true),
         'api_key'  => env('WHATSAPP_API_KEY'),
+        'api_key1'  => env('WHATSAPP_API_KEY1'),
         'base_url' => env('WHATSAPP_BASE_URL'),
     ],
     'admin_whatsapp_numbers' => array_filter(

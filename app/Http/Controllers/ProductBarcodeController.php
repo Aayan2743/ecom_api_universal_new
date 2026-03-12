@@ -494,7 +494,8 @@ public function productByBarcode($barcode)
             [
                 "id" => $variant->id,
                 "name" => $variant->values->pluck('value')->implode(' '),
-                "price" => $variant->purchase_price,
+                // "price" => $variant->purchase_price,
+                "price" => $variant->extra_price-$variant->discount,
                 "stock" => $variant->quantity,
                 "images" => $variant->images->map(function($img){
                     return asset('storage/'.$img->image_path);

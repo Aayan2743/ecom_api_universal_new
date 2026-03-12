@@ -21,6 +21,7 @@ class Sale extends Model
         'shipping_address_snapshot',
         'tracking_number',
         'shipping_partner',
+        'order_from',
     ];
 
     protected $casts = [

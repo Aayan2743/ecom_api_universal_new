@@ -12,7 +12,7 @@ use App\Models\ChatSession;
 use App\Models\Product;
 use App\Models\ProductVariantCombination;
 use App\Models\User;
-use App\Services\Messenger360Service;
+use App\Services\Messenger360Service1;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Razorpay\Api\Api;
@@ -24,15 +24,25 @@ class WhatsAppController extends Controller
 
  protected $messenger;
 
-    public function __construct(Messenger360Service $messenger)
+    public function __construct(Messenger360Service1 $messenger)
     {
         $this->messenger = $messenger;
     }
 
 
+    public function deleteAllChatSessions()
+{
+    ChatSession::truncate();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'All chat sessions deleted successfully'
+    ]);
+}
 
 
-public function webhook(Request $request, Messenger360Service $messenger)
+
+public function webhook(Request $request, Messenger360Service1 $messenger)
 {
     Log::info('Webhook Data:', $request->all());
 
@@ -44,11 +54,7 @@ public function webhook(Request $request, Messenger360Service $messenger)
         $phone = substr($phone,2);
     }
 
-    // $message = strtolower(trim(
-    //     $request->input('message')
-    //     ?? $request->input('Chat')
-    //     ?? $request->input('text')
-    // ));
+
 
 
      // ✅ FIX STARTS HERE
@@ -83,10 +89,45 @@ public function webhook(Request $request, Messenger360Service $messenger)
         ['step'=>'start']
     );
 
+      $user = User::where('phone',$phone)->first();
+
+//  dd($user);
+   if(!$user && $session->step == 'start')
+{
+    $imageUrl = asset('images/no-product.jpg');
+
+    $text = "👋 Welcome! To Sri Devi Herbals
+
+        Please enter your name to continue.";
+
+    $messenger->send(
+        $phone,
+        $text,
+        $imageUrl
+    );
+
+    $session->update([
+        'step'=>'ask_name'
+    ]);
+
+    return response()->json(['status'=>'ask_name']);
+}
+
+
+
+
     switch($session->step)
     {
+
+         case 'ask_name':
+            return $this->saveUserName($phone,$message,$session,$messenger);
+
         case 'start':
-            return $this->sendCategories($phone,$session,$messenger);
+            // return $this->sendCategories($phone,$session,$messenger);
+            return $this->showMainMenu($phone,$user,$session,$messenger);
+
+        case 'menu':
+            return $this->handleMenu($phone,$message,$session,$messenger);
 
         case 'category':
             return $this->selectCategory($phone,$message,$session,$messenger);
@@ -132,6 +173,13 @@ public function webhook(Request $request, Messenger360Service $messenger)
             return response()->json(['status'=>'waiting_payment']);
 
 
+            case 'order_summary':
+    return $this->handleOrderSummary($phone,$message,$session,$messenger);
+
+    case 'confirm_order':
+    return $this->handleOrderConfirmation($phone,$message,$session,$messenger);
+
+
 
               default:
         Log::warning('Unknown step, resetting session');
@@ -147,7 +195,6 @@ public function webhook(Request $request, Messenger360Service $messenger)
 
 private function sendCategories($phone,$session,$messenger)
 {
-
     Log::info('sendCategories triggered',[
         'phone'=>$phone
     ]);
@@ -157,37 +204,179 @@ private function sendCategories($phone,$session,$messenger)
         ->get();
 
     if($categories->isEmpty()){
-        Log::warning('No categories found');
         $messenger->send($phone,"❌ No categories available.");
         return;
     }
 
-    $text  = "🛍 *Select Category*\n";
+    $text  = "🛍 *Select a Category*\n";
     $text .= "━━━━━━━━━━━━━━\n\n";
 
     foreach($categories as $key=>$cat){
 
         $number = $key + 1;
 
-        $text .= $number.". ".$cat->name."\n";
+        $text .= "*".$number.".* ".$cat->name."\n";
     }
 
     $text .= "\n━━━━━━━━━━━━━━\n";
-    $text .= "👉 Reply with category number";
-
-    Log::info('Sending category menu',[
-        'category_count'=>$categories->count()
-    ]);
+    $text .= "↩️ *B* - Back\n\n";
+    $text .= "👉 Reply with the category number";
 
     $messenger->send($phone,$text);
 
-    // reset session data when returning to categories
     $session->update([
         'step'=>'category',
         'data'=>[]
     ]);
+}
 
-    Log::info('Session updated to category step');
+
+private function handleOrderConfirmation($phone,$message,$session,$messenger)
+{
+    if($message == '1'){
+        return $this->sendPaymentLink($phone,$session,$messenger);
+    }
+
+    if($message == '2'){
+        $session->update([
+            'step'=>'address'
+        ]);
+
+        $messenger->send(
+            $phone,
+            "📍 Please enter new delivery address"
+        );
+        return;
+    }
+
+    if($message == '3'){
+
+        $session->update([
+            'step'=>'start',
+            'data'=>[]
+        ]);
+
+        $messenger->send(
+            $phone,
+            "❌ Order cancelled.\n\nReturning to main menu..."
+        );
+
+        $user = User::where('phone',$phone)->first();
+
+        return $this->showMainMenu($phone,$user,$session,$messenger);
+    }
+
+    $messenger->send(
+        $phone,
+        "❌ Invalid option.\n\n1️⃣ Confirm Order\n2️⃣ Change Address\n3️⃣ Cancel"
+    );
+}
+
+
+public function showMainMenu($phone,$user,$session,$messenger)
+{
+
+
+    $text = "👋 Welcome! To Sri Devi Herbals {$user->name}
+
+🏪 *Our Branches*
+
+📍 *Branch 1*
+Balajinagar Road No 1
+Peerzadiguda, Boduppal
+Hyderabad - 500098
+
+📍 Map:
+https://maps.app.goo.gl/KjZ1pF13v7Nd5qWTA?g_st=aw
+
+
+📍 *Branch 2*
+PVT Market, Shop No 23B (-1 Floor)
+Kothapet, Chaitanyapuri Metro
+Dilsukhnagar, Hyderabad - 500035
+
+📍 Map:
+https://maps.app.goo.gl/Q6FhGkhSMkRrL5FS9?g_st=aw
+
+
+How can we help you today?
+
+1. Shopping
+2. Tracking";
+
+   $imageUrl = asset('images/no-product.jpg');
+    $messenger->send($phone,$text, $imageUrl);
+
+    $session->update([
+        'step'=>'menu'
+    ]);
+
+    return response()->json(['status'=>'menu']);
+}
+
+
+private function saveUserName($phone,$message,$session,$messenger)
+{
+    $user = User::create([
+        'name'=>$message,
+        'phone'=>$phone,
+        'role'=>'user',
+        'password'=>bcrypt('123456')
+    ]);
+
+    $text = "✅ Thank you $message!
+
+🏪 *Our Branches*
+
+📍 *Branch 1*
+Balajinagar Road No 1
+Peerzadiguda, Boduppal
+Hyderabad - 500098
+
+📍 Map:
+https://maps.app.goo.gl/KjZ1pF13v7Nd5qWTA?g_st=aw
+
+
+📍 *Branch 2*
+PVT Market, Shop No 23B (-1 Floor)
+Kothapet, Chaitanyapuri Metro
+Dilsukhnagar, Hyderabad - 500035
+
+📍 Map:
+https://maps.app.goo.gl/Q6FhGkhSMkRrL5FS9?g_st=aw
+
+
+How can we help you today?
+
+*1.* Shopping
+*2.* Track Order
+
+";
+
+     $imageUrl = asset('images/no-product.jpg');
+
+    $messenger->send($phone,$text);
+
+    $session->update([
+        'step'=>'menu'
+    ]);
+
+    return response()->json(['status'=>'name_saved']);
+}
+
+public function handleMenu($phone,$message,$session,$messenger)
+{
+    if($message == '1'){
+        $session->update(['step'=>'category']);
+        return $this->sendCategories($phone,$session,$messenger);
+    }
+
+    if($message == '2'){
+        $messenger->send($phone,"📦 Please enter your order ID to track.");
+        return response()->json(['status'=>'tracking']);
+    }
+
+    $messenger->send($phone,"❌ Invalid option\n\n1️⃣ Categories\n2️⃣ Track Order");
 }
 
 
@@ -200,15 +389,20 @@ private function selectCategory($phone,$message,$session,$messenger)
         'message'=>$message
     ]);
 
-    // decode session data
     $data = is_array($session->data) ? $session->data : json_decode($session->data, true);
     $data = $data ?? [];
 
-    // Back to categories
-    if($message == '0'){
-        Log::info('User requested back to categories');
-        return $this->sendCategories($phone,$session,$messenger);
-    }
+    // ✅ Back to menu
+
+
+        if($message == 'b'){
+
+            Log::info('User requested back to main menu');
+
+            $user = User::where('phone',$phone)->first();
+
+            return $this->showMainMenu($phone,$user,$session,$messenger);
+        }
 
     if(!is_numeric($message)){
         Log::warning('User sent non-numeric category');
@@ -223,22 +417,12 @@ private function selectCategory($phone,$message,$session,$messenger)
     $index = (int)$message - 1;
 
     if(!isset($categories[$index])){
-        Log::warning('Invalid category selected',[
-            'message'=>$message
-        ]);
-
         $messenger->send($phone,"❌ Invalid option. Please select again.");
         return;
     }
 
     $category = $categories[$index];
 
-    Log::info('Category selected',[
-        'category_id'=>$category->id,
-        'category_name'=>$category->name
-    ]);
-
-    // pagination
     $page  = $data['page'] ?? 1;
     $limit = 5;
 
@@ -252,7 +436,6 @@ private function selectCategory($phone,$message,$session,$messenger)
         return;
     }
 
-    // message
     $text = "🛍 *Products in ".$category->name."*\n";
     $text .= "━━━━━━━━━━━━━━\n\n";
 
@@ -264,21 +447,16 @@ private function selectCategory($phone,$message,$session,$messenger)
     $text .= "\n━━━━━━━━━━━━━━\n";
     $text .= "👉 Reply product number\n\n";
     $text .= "9️⃣ More Products\n";
-    $text .= "b Back to Categories";
+    $text .= "b Back";
 
     $messenger->send($phone,$text);
 
-    // save session
     $data['category_id'] = $category->id;
     $data['page'] = $page;
 
     $session->update([
         'step'=>'product',
         'data'=>$data
-    ]);
-
-    Log::info('Session moved to product step',[
-        'page'=>$page
     ]);
 }
 
@@ -363,23 +541,47 @@ private function showVariants($phone,$session,$messenger)
 
     $data = $session->data ?? [];
 
-    // If product missing → go back to product list
+    // Product missing
     if(empty($data['product_id'])){
         Log::warning('Product ID missing in session');
         return $this->showProducts($phone,$session,$messenger);
     }
 
-    $product = Product::with('variantCombinations.values')
+    // Load product
+    $product = Product::with(['variantCombinations.values','images'])
         ->find($data['product_id']);
 
     if(!$product){
         Log::warning('Product not found',[
             'product_id'=>$data['product_id']
         ]);
-
         return $this->showProducts($phone,$session,$messenger);
     }
 
+    // Default image
+    $imageUrl = asset('images/no-product.jpg');
+
+    // Get primary image
+    $primaryImage = $product->images->where('is_primary',1)->first();
+
+    if(!$primaryImage){
+        $primaryImage = $product->images->first();
+    }
+
+    if($primaryImage && !empty($primaryImage->image_path)){
+
+        $imagePath = $primaryImage->image_path;
+
+        // Convert WEBP → JPG if needed
+        if(str_ends_with($imagePath,'.webp')){
+            $imagePath = $this->convertWebpToJpg($imagePath);
+        }
+
+        // $imageUrl = asset($imagePath);
+        $imageUrl = asset('storage/'.$imagePath);
+    }
+
+    // Get variants
     $variants = $product->variantCombinations;
 
     if($variants->isEmpty()){
@@ -387,36 +589,49 @@ private function showVariants($phone,$session,$messenger)
         return;
     }
 
+    // Build message
     $text  = "📦 *Select Variant*\n";
-    $text .= "*".$product->name."*\n";
-    $text .= "━━━━━━━━━━━━━━\n\n";
+$text .= "*".$product->name."*\n";
+$text .= "━━━━━━━━━━━━━━\n\n";
 
-    foreach($variants as $key=>$variant){
+foreach($variants as $key=>$variant){
 
-        $number = $key + 1;
+    $number = $key + 1;
 
-        // Get variant name
-        $variationName = $variant->values
-            ->pluck('value')
-            ->implode(' / ');
+    $variationName = $variant->values
+        ->pluck('value')
+        ->implode(' / ');
 
-        if(!$variationName){
-            $variationName = 'Default';
-        }
-
-        // Get price
-        $price = $variant->amount ?? $variant->extra_price ?? 0;
-
-        $text .= $number.". ".$variationName." - ₹".$price."\n";
+    if(!$variationName){
+        $variationName = 'Default';
     }
 
-    $text .= "\n━━━━━━━━━━━━━━\n";
-    $text .= "👉 Reply variant number\n\n";
-    $text .= "b. Back to Products";
+    $price = $variant->amount ?? $variant->extra_price ?? 0;
 
-    $messenger->send($phone,$text);
+    $text .= $number.". ".$variationName." - ₹".$price."\n";
+}
 
-    // Keep session at variant step
+$text .= "\n━━━━━━━━━━━━━━\n";
+
+$text .= "🔗 *Product Details*\n";
+$text .= "Description: https://www.herbalandco.in/product/indigo?srsltid=AfmBOorigxZ0KGENRpZXRIFAyICja-EiyPKfEOifIqQ3z9P7Up0JVyO8.\n";
+$text .= "🎥 Video: https://www.youtube.com/shorts/0BRG6MPKGaQ \n\n";
+
+$text .= "👉 Reply variant number\n\n";
+$text .= "b. Back to Products";
+
+    Log::info('Sending image with variants',[
+        'image'=>$imageUrl
+    ]);
+
+    // ✅ Send IMAGE + TEXT together
+    $messenger->send(
+        $phone,
+        $text,
+        $imageUrl
+    );
+
+    // Update session
     $session->update([
         'step'=>'variant',
         'data'=>$data
@@ -448,6 +663,11 @@ private function selectVariant($phone,$message,$session,$messenger)
     $product = Product::with('variantCombinations.values')
         ->find($data['product_id']);
 
+    if(!$product){
+        $messenger->send($phone,"❌ Product not found.");
+        return;
+    }
+
     $variants = $product->variantCombinations;
 
     $index = (int)$message - 1;
@@ -459,90 +679,37 @@ private function selectVariant($phone,$message,$session,$messenger)
 
     $variant = $variants[$index];
 
+    // Save variant
     $data['variant_id'] = $variant->id;
 
-    // 🔹 Check if user exists
-  Log::info('Checking user and address',[
-    'phone' => $phone
-]);
+    // Get variant name
+    $variationName = $variant->values
+        ->pluck('value')
+        ->implode(' / ');
 
-$user = User::where('phone',$phone)->with('addresses')->first();
-
-if($user){
-    Log::info('User found',[
-        'user_id' => $user->id,
-        'address_count' => $user->addresses->count()
-    ]);
-}else{
-    Log::warning('User not found',[
-        'phone' => $phone
-    ]);
-}
-
-
-
-if($user && $user->addresses && $user->addresses->count() > 0){
-
-    Log::info('User has addresses',[
-        'user_id' => $user->id,
-        'address_count' => $user->addresses->count()
-    ]);
-
-    $text  = "📍 *Select Delivery Address*\n";
-    $text .= "━━━━━━━━━━━━━━\n\n";
-
-    foreach($user->addresses as $key => $addr){
-
-        $number = $key + 1;
-
-        Log::info('Address option',[
-            'address_id' => $addr->id,
-            'address' => $addr->address
-        ]);
-
-        $text .= $number.". ".$addr->address;
-
-        if($addr->city){
-            $text .= ", ".$addr->city;
-        }
-
-        if($addr->pincode){
-            $text .= " - ".$addr->pincode;
-        }
-
-        $text .= "\n\n";
+    if(!$variationName){
+        $variationName = 'Default';
     }
 
-    $newAddressOption = $user->addresses->count() + 1;
+    $price = $variant->amount ?? $variant->extra_price ?? 0;
 
+    // 🧾 ORDER SUMMARY MESSAGE
+    $text  = "🧾 *Order Summary*\n";
+    $text .= "━━━━━━━━━━━━━━\n\n";
+    $text .= "Product: ".$product->name."\n";
+    $text .= "Variant: ".$variationName."\n";
+    $text .= "Price: ₹".$price."\n\n";
     $text .= "━━━━━━━━━━━━━━\n";
-    $text .= $newAddressOption.". Add New Address";
+    $text .= "1️⃣ Continue\n";
+    $text .= "2️⃣ Change Variant\n";
+    $text .= "3️⃣ Cancel";
 
     $session->update([
-        'step'=>'select_address',
+        'step'=>'order_summary',
         'data'=>$data
     ]);
-
-    Log::info('Session moved to select_address step');
 
     $messenger->send($phone,$text);
-}
-else{
-
-    Log::warning('No address found for user, asking for new address',[
-        'phone'=>$phone
-    ]);
-
-    $session->update([
-        'step'=>'address',
-        'data'=>$data
-    ]);
-
-    $messenger->send(
-        $phone,
-        "📍 Please enter your delivery address"
-    );
-}
 }
 
 private function showProducts($phone,$session,$messenger)
@@ -594,6 +761,8 @@ private function showProducts($phone,$session,$messenger)
     ]);
 }
 
+
+
 private function confirmAddress($phone,$message,$session,$messenger)
 {
     Log::info('confirmAddress triggered',[
@@ -605,21 +774,38 @@ private function confirmAddress($phone,$message,$session,$messenger)
 
     if($message == '1'){
 
-        $user = User::where('phone',$phone)->with('addresses')->first();
+        $user = User::where('phone',$phone)->first();
 
-        $address = $user->addresses->first();
+        // 🔥 SAVE ADDRESS
+        $address = Address::create([
+            'user_id'   => $user->id,
+            'name'      => $user->name ?? 'Customer',
+            'phone'     => $phone,
+            'address'   => $data['address'],
+            'city'      => $data['city'],
+            'state'     => $data['state'],
+            'country'   => 'India',
+            'pincode'   => $data['pincode'],
+            'is_default'=> 1
+        ]);
 
-        $data['address']  = $address->address;
-        $data['city']     = $address->city;
-        $data['state']    = $address->state;
-        $data['pincode']  = $address->pincode;
+        Log::info('Address saved',[
+            'address_id'=>$address->id
+        ]);
+
+        $data['address_id'] = $address->id;
 
         $session->update([
-            'step'=>'payment',
+            'step'=>'payment_pending',
             'data'=>$data
         ]);
 
-        $messenger->send($phone,"✅ Using saved address.");
+        $messenger->send(
+            $phone,
+            "✅ Address saved successfully.\n\n⏳ Preparing your payment link..."
+        );
+
+        return $this->sendPaymentLink($phone,$session,$messenger);
     }
 
     elseif($message == '2'){
@@ -634,8 +820,100 @@ private function confirmAddress($phone,$message,$session,$messenger)
             "📍 Please enter your *Street Address*\n\nExample:\n12 Main Road, Near Temple"
         );
     }
+
+    else{
+        $messenger->send(
+            $phone,
+            "❌ Invalid option.\n\n1️⃣ Confirm Address\n2️⃣ Change Address"
+        );
+    }
 }
 
+private function handleOrderSummary($phone,$message,$session,$messenger)
+{
+    $data = $session->data ?? [];
+
+    // Continue to address
+    if($message == '1'){
+
+        $user = User::where('phone',$phone)->with('addresses')->first();
+
+        if($user && $user->addresses->count() > 0){
+
+            $text  = "📍 *Select Delivery Address*\n";
+            $text .= "━━━━━━━━━━━━━━\n\n";
+
+            foreach($user->addresses as $key=>$addr){
+
+                $number = $key + 1;
+
+                $text .= $number.". ".$addr->address;
+
+                if($addr->city){
+                    $text .= ", ".$addr->city;
+                }
+
+                if($addr->pincode){
+                    $text .= " - ".$addr->pincode;
+                }
+
+                $text .= "\n\n";
+            }
+
+            $text .= "━━━━━━━━━━━━━━\n";
+            $text .= ($user->addresses->count()+1).". Add New Address";
+
+            $session->update([
+                'step'=>'select_address',
+                'data'=>$data
+            ]);
+
+            $messenger->send($phone,$text);
+        }
+        else{
+
+            $session->update([
+                'step'=>'address',
+                'data'=>$data
+            ]);
+
+            $messenger->send(
+                $phone,
+                "📍 Please enter your delivery address"
+            );
+        }
+
+        return;
+    }
+
+    // Change variant
+    if($message == '2'){
+        return $this->showVariants($phone,$session,$messenger);
+    }
+
+    // ❌ Cancel order
+    if($message == '3'){
+
+        $session->update([
+            'step'=>'start',
+            'data'=>[]
+        ]);
+
+        $user = User::where('phone',$phone)->first();
+
+        $messenger->send(
+            $phone,
+            "❌ Order cancelled.\n\nReturning to main menu..."
+        );
+
+        return $this->showMainMenu($phone,$user,$session,$messenger);
+    }
+
+    $messenger->send(
+        $phone,
+        "❌ Invalid option.\n\n1️⃣ Continue\n2️⃣ Change Variant\n0️⃣ Cancel"
+    );
+}
 
 
 private function saveAddress($phone,$message,$session,$messenger)
@@ -647,11 +925,11 @@ private function saveAddress($phone,$message,$session,$messenger)
     $data['address'] = $message;
 
     $session->update([
-        'step'=>'city',
+        'step'=>'pincode',
         'data'=>$data
     ]);
 
-    $messenger->send($phone,"🏙 Please enter your *City*");
+    $messenger->send($phone,"🏙 Please enter your *Pincode* To get All ur City & State");
 }
 
 
@@ -693,35 +971,47 @@ private function savePincode($phone,$message,$session,$messenger)
 
     $data = $session->data ?? [];
 
-    $data['pincode'] = $message;
+    $pincode = trim($message);
 
-    $user = User::where('phone',$phone)->first();
+    $apiUrl = "https://api.postalpincode.in/pincode/".$pincode;
 
-    Address::create([
-        'user_id'   => $user->id,
-        'name'      => $user->name ?? 'Customer',
-        'phone'     => $phone,
-        'address'   => $data['address'],
-        'city'      => $data['city'],
-        'state'     => $data['state'],
-        'country'   => 'India',
-        'pincode'   => $data['pincode'],
-        'is_default'=> 1
-    ]);
+    $response = file_get_contents($apiUrl);
+    $result = json_decode($response,true);
 
-    Log::info('Address saved');
+    if(!$result || $result[0]['Status'] != 'Success'){
+        $messenger->send(
+            $phone,
+            "❌ Invalid pincode. Please enter a valid pincode."
+        );
+        return;
+    }
+
+    $postOffice = $result[0]['PostOffice'][0];
+
+    $data['pincode'] = $postOffice['Pincode'];
+    $data['city']    = $postOffice['District'];
+    $data['state']   = $postOffice['State'];
+    $data['country'] = $postOffice['Country'];
+
+    $text  = "📍 *Confirm Your Address*\n";
+    $text .= "━━━━━━━━━━━━━━\n\n";
+
+    $text .= $data['address']."\n";
+    $text .= $data['city']."\n";
+    $text .= $data['state']." - ".$data['pincode']."\n";
+    $text .= "India\n\n";
+
+    $text .= "━━━━━━━━━━━━━━\n";
+    $text .= "1️⃣ Confirm Address\n";
+    $text .= "2️⃣ Change Address";
 
     $session->update([
-        'step'=>'payment',
-        'data'=>[]
+        'step'=>'confirm_address',
+        'data'=>$data
     ]);
 
-    $messenger->send(
-        $phone,
-        "✅ Address saved successfully.\n\nPreparing your order..."
-    );
+    $messenger->send($phone,$text);
 }
-
 
 private function selectAddress($phone,$message,$session,$messenger)
 {
@@ -767,6 +1057,8 @@ private function selectAddress($phone,$message,$session,$messenger)
     $data['state'] = $address->state;
     $data['pincode'] = $address->pincode;
 
+    $data['address_id'] = $address->id;
+
     $session->update([
         'step'=>'payment',
         'data'=>$data
@@ -781,57 +1073,46 @@ private function selectAddress($phone,$message,$session,$messenger)
 }
 
 
-private function sendPaymentLink_q($phone,$session,$messenger)
+private function showFinalConfirmation($phone,$session,$messenger)
 {
-    Log::info('Creating payment link',[
-        'phone'=>$phone
-    ]);
-
     $data = $session->data ?? [];
 
-    $variant = ProductVariantCombination::find($data['variant_id']);
+    $variant = ProductVariantCombination::with(['product','values'])
+        ->find($data['variant_id']);
 
-    if(!$variant){
-        Log::error('Variant not found');
-        return;
-    }
+    $variationName = $variant->values
+        ->pluck('value')
+        ->implode(' / ');
 
-    $amount = $variant->amount; // your variant price
+    $price = $variant->amount ?? 0;
 
-    $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
+    $text  = "🧾 *Confirm Your Order*\n";
+    $text .= "━━━━━━━━━━━━━━\n\n";
 
-    $payment = $api->paymentLink->create([
-        'amount' => $amount * 100, // paise
-        'currency' => 'INR',
-        'description' => 'Order Payment',
-        'customer' => [
-            'contact' => $phone
-        ],
-        'notify' => [
-            'sms' => false,
-            'email' => false
-        ],
-        'callback_url' => url('/payment-success'),
-        'callback_method' => 'get'
-    ]);
+    $text .= "Product: ".$variant->product->name."\n";
+    $text .= "Variant: ".$variationName."\n";
+    $text .= "Price: ₹".$price."\n\n";
 
-    $paymentLink = $payment['short_url'];
+    $text .= "📍 Delivery Address\n";
+    $text .= $data['address'].", ".$data['city']."\n";
+    $text .= $data['state']." - ".$data['pincode']."\n\n";
 
-    Log::info('Payment link created',[
-        'link'=>$paymentLink
-    ]);
+    $text .= "━━━━━━━━━━━━━━\n";
+    $text .= "1️⃣ Confirm Order\n";
+    $text .= "2️⃣ Change Address\n";
+    $text .= "3️⃣ Cancel";
 
-    $messenger->send(
-        $phone,
-        "💳 *Payment Link*\n\nClick below to complete your order:\n".$paymentLink
-    );
-
+      // IMPORTANT: set session step
     $session->update([
-        'step'=>'payment_pending'
+        'step' => 'confirm_order',
+        'data' => $data
     ]);
+
+    $messenger->send($phone,$text);
 }
 
-private function sendPaymentLink($phone,$session,$messenger)
+
+private function sendPaymentLin_w($phone,$session,$messenger)
 {
     Log::info('Creating payment link',[
         'phone'=>$phone
@@ -906,42 +1187,319 @@ private function sendPaymentLink($phone,$session,$messenger)
     ]);
 }
 
-  public function checkPayment($linkId)
-    {
-        $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
+private function sendPaymentLink($phone,$session,$messenger)
+{
+    Log::info('Creating payment link',['phone'=>$phone]);
 
-        try {
+    $data = $session->data ?? [];
 
-            $link = $api->paymentLink->fetch($linkId);
 
-            if($link['status'] == 'paid'){
 
-                PaymentLink::where('razorpay_link_id',$linkId)
-                    ->update([
-                        'status'=>'paid',
-                        'paid_at'=>now()
-                    ]);
+       Log::info('Session Data',['Session Data'=>$data]);
+    $variant = ProductVariantCombination::with('product')
+                ->find($data['variant_id']);
 
-                return response()->json([
-                    'status'=>'success',
-                    'message'=>'Payment completed'
-                ]);
+    if(!$variant){
+        Log::error('Variant not found');
+        return;
+    }
 
-            }
+    $amount = $variant->amount;
 
-            return response()->json([
-                'status'=>'pending',
-                'message'=>'Payment not completed'
-            ]);
+    $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
 
-        } catch (\Exception $e) {
+  $payment = $api->paymentLink->create([
+    'amount' => $amount * 100,
+    'currency' => 'INR',
+    'description' => 'Order Payment',
+    'customer' => [
+        'name' => $variant->product->name ?? 'Customer',
+        'contact' => $phone
+    ],
+    'notify' => [
+        'sms' => false,
+        'email' => false
+    ],
+    'callback_url' => url('/api/payment-success'),
+    'callback_method' => 'get'
+]);
 
+$paymentLink = $payment['short_url'];
+$paymentId = $payment['id'];
+
+$confirmUrl = url('api/payment-success/'.$paymentId);
+
+    $paymentLink = $payment['short_url'];
+
+    // save payment snapshot
+    PaymentLink::create([
+        'razorpay_link_id' => $payment['id'],
+        'payment_link'     => $paymentLink,
+        'amount'           => $amount,
+        'customer_name'    => $variant->product->name ?? 'Customer',
+        'customer_phone'   => $phone,
+        'variant_id'       => $data['variant_id'],
+        'address_id'       => $data['address_id'] ?? null,
+        'status'           => 'pending'
+    ]);
+
+    $confirmUrl = url('/payment-success/'.$payment['id']);
+
+    $messenger->send(
+        $phone,
+        "💳 *Payment Link*\n\n".
+        "Complete payment:\n".
+        $paymentLink."\n\n".
+        "After payment click:\n".
+        $confirmUrl
+    );
+
+    $session->update(['step'=>'payment_pending']);
+}
+
+
+
+
+
+public function checkPayment(Request $request)
+{
+    $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
+
+    try {
+
+        // Razorpay parameters
+        $linkId = $request->razorpay_payment_link_id;
+        $paymentId = $request->razorpay_payment_id;
+        $status = $request->razorpay_payment_link_status;
+
+        if(!$linkId){
             return response()->json([
                 'status'=>'error',
-                'message'=>$e->getMessage()
+                'message'=>'Payment link id missing'
             ]);
         }
+
+        // fetch payment link from Razorpay
+        $link = $api->paymentLink->fetch($linkId);
+
+        if($status == 'paid'){
+
+            $payment = PaymentLink::where('razorpay_link_id',$linkId)->first();
+
+            if(!$payment){
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Payment record not found'
+                ]);
+            }
+
+            // mark payment paid
+            $payment->update([
+                'status'=>'paid',
+                'paid_at'=>now()
+            ]);
+
+
+             // USER
+            $user = User::where('phone',$payment->customer_phone)->first();
+
+            // VARIANT
+            $variant = ProductVariantCombination::with('product')
+                        ->find($payment->variant_id);
+
+                        // dd($variant);
+
+            if(!$variant){
+                return response()->json([
+                    'status'=>'error',
+                    'message'=>'Variant not found'
+                ]);
+            }
+
+            // /*
+            // --------------------------------------------------
+            // CREATE ORDER
+            // --------------------------------------------------
+            // */
+
+            // $orderId = DB::table('orders')->insertGetId([
+            //     'merchant_order_id'     => 'ORD'.time(),
+            //     'phonepe_transaction_id'=> $paymentId,
+            //     'user_id'               => $user->id,
+            //     'address_id'            => $payment->address_id,
+            //     'payment_method'        => 'razorpay',
+            //     'razorpay_order_id'     => $linkId,
+            //     'razorpay_payment_id'   => $paymentId,
+            //     'subtotal'              => $variant->amount,
+            //     'discount'              => 0,
+            //     'total_amount'          => $variant->amount,
+            //     'status'                => 'paid',
+            //     'created_at'            => now(),
+            //     'updated_at'            => now()
+            // ]);
+
+            // /*
+            // --------------------------------------------------
+            // ORDER ITEM SNAPSHOT
+            // --------------------------------------------------
+            // */
+
+            // DB::table('order_items')->insert([
+            //     'order_id'   => $orderId,
+            //     'product_id' => $variant->product_id,
+            //     'quantity'   => 1,
+            //     'price'      => $variant->amount,
+            //     'total'      => $variant->amount,
+            //     'created_at' => now(),
+            //     'updated_at' => now()
+            // ]);
+
+
+            $address = Address::find($payment->address_id);
+
+
+
+// CREATE SALE
+$saleId = DB::table('sales')->insertGetId([
+      'invoice_number'            => 'INV-' . now()->format('YmdHis') . '-' . rand(100, 999),
+    'customer_id'    => $user->id ?? null,
+    'user_id'        => $user->id ?? null,
+
+    'shipping_address_snapshot' => json_encode([
+        'name'    => $address->name ?? '',
+        'phone'   => $address->phone ?? '',
+        'address' => $address->address ?? '',
+        'city'    => $address->city ?? '',
+        'state'   => $address->state ?? '',
+        'pincode' => $address->pincode ?? ''
+    ]),
+
+    'subtotal'       => $variant->amount,
+    'discount_total' => 0,
+    'tax_total'      => 0,
+    'grand_total'    => $variant->amount,
+
+    'payment_method' => 'razorpay',
+    'paid_amount'    => $variant->amount,
+    'change_amount'  => 0,
+
+    'customer_name'  => $user->name ?? 'Customer',
+    'customer_phone' => $payment->customer_phone,
+
+    'status' => 'created',
+    'order_from' => 'whatsapp',
+
+    'created_at' => now(),
+    'updated_at' => now()
+]);
+
+// VARIANT NAME
+$variantName = $variant->values->pluck('value')->implode(' / ');
+
+// PRODUCT IMAGE
+$image = optional($variant->images->first())->image_path;
+
+// CREATE SALE ITEM
+DB::table('sale_items')->insert([
+    'sale_id' => $saleId,
+
+    'product_id'             => $variant->product_id,
+    'variant_combination_id' => $variant->id,
+
+    'product_name' => $variant->product->name,
+    'variant_name' => $variantName,
+    'sku'          => $variant->sku ?? null,
+
+    'product_image' => $image,
+
+    'price'    => $variant->amount,
+    'discount' => 0,
+    'tax'      => 0,
+
+    'quantity' => 1,
+    'total'    => $variant->amount,
+
+    'created_at' => now(),
+    'updated_at' => now()
+]);
+
+
+             $phone = $payment->customer_phone;
+
+
+
+             ChatSession::where('phone', $phone)->update([
+    'step' => 'start',
+    'data' => null
+]);
+
+
+
+
+
+        $this->messenger->send(
+            $phone,
+            "✅ *Payment Successful*\n\n".
+            "Thank you for your order!\n\n".
+            "Amount Paid: ₹".$payment->amount."\n\n".
+            "Your order will be processed shortly.\n".
+            "🙏 Sri Devi Herbals"
+        );
+
+
+
+
+        return view('payment_success');
+            // return response()->json([
+            //     'status'=>'success',
+            //     'message'=>'Payment successful'
+            // ]);
+        }
+
+        // return response()->json([
+        //     'status'=>'pending',
+        //     'message'=>'Payment not completed'
+        // ]);
+
+        return view('payment_pending');
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'status'=>'error',
+            'message'=>$e->getMessage()
+        ]);
     }
+}
+
+
+
+
+private function convertWebpToJpg($webpPath)
+{
+    $fullPath = storage_path('app/public/'.$webpPath);
+
+    if(!file_exists($fullPath)){
+        Log::error('Image file not found',[
+            'path'=>$fullPath
+        ]);
+        return $webpPath;
+    }
+
+    $jpgPath = str_replace('.webp','.jpg',$webpPath);
+    $jpgFullPath = storage_path('app/public/'.$jpgPath);
+
+    if(!file_exists($jpgFullPath)){
+
+        $image = imagecreatefromwebp($fullPath);
+
+        imagejpeg($image,$jpgFullPath,90);
+
+        imagedestroy($image);
+    }
+
+    return $jpgPath;
+}
 
 
 }

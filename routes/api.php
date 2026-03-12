@@ -43,11 +43,22 @@ use App\Http\Controllers\ProductBarcodeController;
 
 
 // this is use for whatsapp payment link creation and webhook handling
-Route::get('/payment-success/{linkid}', [WhatsAppController::class,'checkPayment']);
+Route::get('/payment-success', [WhatsAppController::class,'checkPayment']);
+
+
+// Route::get('/dashboard/orders', [OrderController::class,'allorders']);
+// // Route::get('/dashboard/orders', [OrderController::class,'dashboardOrders']);
+// Route::get('/dashboard/stats', [OrderController::class,'dashboardStats']);
+
+Route::get('/cart/online-orders', [OrderController::class,'allorders']);
+Route::get('/cart/online-orders/stats', [OrderController::class,'stats']);
+Route::get('/cart/online-orders/status-counts', [OrderController::class,'statusCounts']);
+Route::put('/cart/online-orders/{id}/status', [OrderController::class,'updateStatus']);
+Route::get('/cart/online-orders/{id}', [OrderController::class,'show']);
 
 
 Route::post('/payment/create', [phonepaycontroller::class, 'create']);
-
+Route::get('/delete-chat-sessions', [WhatsAppController::class, 'deleteAllChatSessions']);
 Route::get('/payment/status/{transactionId}',
     [phonepaycontroller::class, 'status']);
 
@@ -256,6 +267,7 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     // 🟢 Step 2: Verify OTP & Create Final Order
     Route::post('/verify-order-otp', [PosController::class, 'verifyOrderOtp']);
     Route::post('/pos/create-order', [posController::class, 'store']);
+    Route::post('/pos/create-order-oncall', [posController::class, 'storeOncall']);
 
     // add customer
 
