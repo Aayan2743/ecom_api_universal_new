@@ -165,7 +165,7 @@ class ShippingController extends Controller
     }
 
     /* ================= SEND COURIER ================= */
-    public function sendCourier(Request $request, $id)
+    public function sendCourier_w(Request $request, $id)
     {
 
         // dd($request->all());
@@ -289,6 +289,156 @@ class ShippingController extends Controller
 
         $order->status = 'shipped';
         $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Courier order created successfully',
+        ]);
+    }
+
+    public function sendCourier(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'courier' => 'required|string',
+            'length'  => 'required|numeric',
+            'breadth' => 'required|numeric',
+            'height'  => 'required|numeric',
+            'weight'  => 'required|numeric', // dead weight from form
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $order = Sale::findOrFail($id);
+
+        switch ($request->courier) {
+
+            case 'shiprocket':
+                // Shiprocket logic here
+                break;
+
+            case 'shipmozo':
+
+                $shipmozo = new ShipmozoClient();
+
+                $address = is_array($order->shipping_address_snapshot)
+                    ? $order->shipping_address_snapshot
+                    : json_decode($order->shipping_address_snapshot, true);
+
+                if (! $address) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Shipping address missing',
+                    ]);
+                }
+
+                /* ================= WEIGHT CALCULATIONS ================= */
+
+                $deadWeight = (float) $request->weight;
+
+                $length  = (float) $request->length;
+                $breadth = (float) $request->breadth;
+                $height  = (float) $request->height;
+
+                // volumetric weight
+                $volumetricWeight = round(($length * $breadth * $height) / 5000, 2);
+
+                /* ================= PRODUCT DETAILS ================= */
+
+                $productDetails = [];
+
+                foreach ($order->items as $item) {
+                    $productDetails[] = [
+                        "name"             => $item->product_name,
+                        "sku_number"       => $item->sku ?? (string) $item->product_id,
+                        "quantity"         => (int) $item->quantity,
+                        "discount"         => (string) $item->discount,
+                        "hsn"              => "",
+                        "unit_price"       => (float) $item->price,
+                        "product_category" => "Other",
+                    ];
+                }
+
+                /* ================= PAYLOAD ================= */
+
+                $payload = [
+
+                    "order_id"                   => (string) $order->invoice_number,
+                    "order_date"                 => now()->format('Y-m-d'),
+                    "order_type"                 => "ESSENTIALS",
+
+                    "consignee_name"             => $address['name'],
+                    "consignee_phone"            => (string) $address['phone'],
+                    "consignee_alternate_phone"  => "",
+                    "consignee_email"            => "",
+                    "consignee_address_line_one" => $address['address'],
+                    "consignee_address_line_two" => "",
+                    "consignee_pin_code"         => (string) $address['pincode'],
+                    "consignee_city"             => $address['city'],
+                    "consignee_state"            => $address['state'],
+
+                    "product_detail"             => $productDetails,
+
+                    "payment_type"               => $order->payment_method === 'cod'
+                        ? "COD"
+                        : "PREPAID",
+
+                    "cod_amount"                 => $order->payment_method === 'cod'
+                        ? (float) $order->grand_total
+                        : "",
+
+                    "shipping_charges"           => "",
+
+                    // weights
+                    "weight"                     => $deadWeight,
+                    // "volumetric_weight"          => $volumetricWeight,
+
+                    "length"                     => $length,
+                    "width"                      => $breadth,
+                    "height"                     => $height,
+
+                    "warehouse_id"               => "72958",
+                    "gst_ewaybill_number"        => "",
+                    "gstin_number"               => "",
+                ];
+
+                $response = $shipmozo->createOrder($payload);
+
+                \Log::info('Shipmozo Response Full', $response);
+
+                if ($response['result'] !== "1") {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $response['message'] ?? 'Shipmozo failed',
+                    ]);
+                }
+
+                /* ================= SAVE INTO SALES TABLE ================= */
+
+                $order->tracking_number   = $response['data']['order_id'];
+                $order->shipping_partner  = 'shipmozo';
+                $order->status            = 'shipped';
+                $order->dead_weight       = $deadWeight;
+                $order->volumetric_weight = $volumetricWeight;
+
+                $order->save();
+
+                break;
+
+            case 'delhivery':
+                // Delhivery logic
+                break;
+
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid courier selected',
+                ]);
+        }
 
         return response()->json([
             'success' => true,

@@ -16,8 +16,6 @@ class ProductController extends Controller
         $search  = $request->search;
         $perPage = $request->perPage ?? 10;
 
-
-
         // $products = Product::query()
         //     ->whereNull('deleted_at') // explicit (optional but clean)
         //     ->with([
@@ -33,26 +31,26 @@ class ProductController extends Controller
         //     ->paginate($perPage);
 
         $products = Product::query()
-    ->whereNull('deleted_at')
+            ->whereNull('deleted_at')
 
-    ->when($search, function ($q) use ($search) {
-        $q->where(function ($sub) use ($search) {
-            $sub->where('name', 'like', "%{$search}%")
-                ->orWhere('slug', 'like', "%{$search}%");
-        });
-    })
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%");
+                });
+            })
 
-    ->with([
-        'category:id,name,parent_id',
-        'category.parent:id,name',
-        'brand:id,name',
-        'images:id,product_id,image_path,is_primary',
-        'sections:id,name,slug',
-    ])
-    ->withMin('variantCombinations as min_price', 'extra_price')
-    ->withMin('variantCombinations as min_discount', 'discount')
-    ->orderBy('id', 'desc')
-    ->paginate($perPage);
+            ->with([
+                'category:id,name,parent_id',
+                'category.parent:id,name',
+                'brand:id,name',
+                'images:id,product_id,image_path,is_primary',
+                'sections:id,name,slug',
+            ])
+            ->withMin('variantCombinations as min_price', 'extra_price')
+            ->withMin('variantCombinations as min_discount', 'discount')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
 
         return response()->json([
             'data'       => $products->getCollection()->map(fn($p) => [
@@ -205,21 +203,17 @@ class ProductController extends Controller
     }
 
     /* ================= STORE ================= */
-    public function store(Request $request)
+
+    public function store_w(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             'name'             => 'required|string|max:255',
             'category_id'      => 'required|exists:categories,id',
             'brand_id'         => 'nullable|exists:brands,id',
-
-            // 'purchase_price'   => 'nullable|numeric|min:0',
-            // 'base_price'       => 'nullable|numeric|min:0',
-            // 'discount'         => 'nullable|numeric|min:0',
             'status'           => 'nullable|in:draft,active,inactive',
-
             'specifications'   => 'nullable|array',
             'specifications.*' => 'nullable|string',
-
             'extra_details'    => 'nullable|array',
         ]);
 
@@ -230,17 +224,21 @@ class ProductController extends Controller
             ], 422);
         }
 
+        // Generate unique slug
+        $slug = Str::slug($request->name);
+        $i    = 1;
+
+        while (Product::where('slug', $slug)->exists()) {
+            $slug = Str::slug($request->name) . '-' . $i;
+            $i++;
+        }
+
         $product = Product::create([
             'name'           => $request->name,
-            'slug'           => Str::slug($request->name),
+            'slug'           => $slug,
             'category_id'    => $request->category_id,
             'brand_id'       => $request->brand_id,
-
-            // 'purchase_price' => $request->purchase_price,
-            // 'base_price'     => $request->base_price,
-            // 'discount'       => $request->discount,
             'status'         => $request->status ?? 'draft',
-
             'specifications' => $request->specifications ?? [],
             'extra_details'  => $request->extra_details ?? [],
         ]);
@@ -254,8 +252,57 @@ class ProductController extends Controller
         ]);
     }
 
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name'             => 'required|string|max:255|unique:products,name',
+            'category_id'      => 'required|exists:categories,id',
+            'brand_id'         => 'nullable|exists:brands,id',
+            'status'           => 'nullable|in:draft,active,inactive',
+            'specifications'   => 'nullable|array',
+            'specifications.*' => 'nullable|string',
+            'extra_details'    => 'nullable|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors()->first(),
+            ], 422);
+        }
+
+        // generate slug
+        $slug = Str::slug($request->name);
+
+        // check if slug exists
+        if (Product::where('slug', $slug)->exists()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => 'Product already exists',
+            ], 422);
+        }
+
+        $product = Product::create([
+            'name'           => $request->name,
+            'slug'           => $slug,
+            'category_id'    => $request->category_id,
+            'brand_id'       => $request->brand_id,
+            'status'         => $request->status ?? 'draft',
+            'specifications' => $request->specifications ?? [],
+            'extra_details'  => $request->extra_details ?? [],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product created successfully',
+            'product' => [
+                'id' => $product->id,
+            ],
+        ], 201);
+    }
+
     /* ================= UPDATE ================= */
-    public function update(Request $request, $id)
+    public function update_w(Request $request, $id)
     {
         $product = Product::findOrFail($id);
 
@@ -293,6 +340,60 @@ class ProductController extends Controller
             // 'discount'       => $request->discount,
             'status'         => $request->status ?? $product->status,
 
+            'specifications' => $request->specifications ?? [],
+            'extra_details'  => $request->extra_details ?? [],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product updated successfully',
+            'product' => [
+                'id' => $product->id,
+            ],
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'name'             => 'required|string|max:255|unique:products,name,' . $id,
+            'category_id'      => 'required|exists:categories,id',
+            'brand_id'         => 'nullable|exists:brands,id',
+            'status'           => 'nullable|in:draft,active,inactive',
+            'specifications'   => 'nullable|array',
+            'specifications.*' => 'nullable|string',
+            'extra_details'    => 'nullable|array',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $slug = Str::slug($request->name);
+
+        // check duplicate slug except current product
+        $exists = Product::where('slug', $slug)
+            ->where('id', '!=', $id)
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'success' => false,
+                'errors'  => 'Product with this name already exists.',
+            ], 422);
+        }
+
+        $product->update([
+            'name'           => $request->name,
+            'slug'           => $slug,
+            'category_id'    => $request->category_id,
+            'brand_id'       => $request->brand_id,
+            'status'         => $request->status ?? $product->status,
             'specifications' => $request->specifications ?? [],
             'extra_details'  => $request->extra_details ?? [],
         ]);
@@ -419,7 +520,6 @@ class ProductController extends Controller
     public function posProducts_workinf(Request $request)
     {
 
-
         $category = $request->category;
 
         $products = Product::with([
@@ -461,57 +561,57 @@ class ProductController extends Controller
     }
 
     public function posProducts(Request $request)
-{
-    $category = $request->category;
+    {
+        $category = $request->category;
 
-    $products = Product::with([
-        'images',
-        'variantCombinations.images',
-        'variantCombinations.values' // ✅ load variation values
-    ])
-    ->when($category !== 'all', function ($q) use ($category) {
-        $q->where('category_id', $category);
-    })
-    ->where('status', 'Published')
-    ->get();
+        $products = Product::with([
+            'images',
+            'variantCombinations.images',
+            'variantCombinations.values', // ✅ load variation values
+        ])
+            ->when($category !== 'all', function ($q) use ($category) {
+                $q->where('category_id', $category);
+            })
+            ->where('status', 'Published')
+            ->get();
 
-    return response()->json([
-        'data' => $products->map(function ($p) {
+        return response()->json([
+            'data' => $products->map(function ($p) {
 
-            return [
-                'id'        => $p->id,
-                'name'      => $p->name,
+                return [
+                    'id'        => $p->id,
+                    'name'      => $p->name,
 
-                'image_url' => optional($p->images->first())->image_path
-                    ? asset('storage/' . $p->images->first()->image_path)
-                    : null,
+                    'image_url' => optional($p->images->first())->image_path
+                        ? asset('storage/' . $p->images->first()->image_path)
+                        : null,
 
-                'variants'  => $p->variantCombinations->map(function ($v) {
+                    'variants'  => $p->variantCombinations->map(function ($v) {
 
-                    // ✅ build variation name (500 g / 1 kg etc)
-                    $variationName = $v->values->pluck('value')->implode(' / ');
+                        // ✅ build variation name (500 g / 1 kg etc)
+                        $variationName = $v->values->pluck('value')->implode(' / ');
 
-                    return [
-                        'id'    => $v->id,
+                        return [
+                            'id'     => $v->id,
 
-                        // 🔥 frontend already uses variant.name
-                        'name'  => $variationName ?: $v->sku,
+                            // 🔥 frontend already uses variant.name
+                            'name'   => $variationName ?: $v->sku,
 
-                        'price' => $v->extra_price-$v->discount,
-                        'stock' => $v->quantity,
+                            'price'  => $v->extra_price - $v->discount,
+                            'stock'  => $v->quantity,
 
-                        'images' => $v->images->map(function ($img) {
-                            return [
-                                'id'        => $img->id,
-                                'image_url' => asset('storage/' . $img->image_path),
-                            ];
-                        }),
-                    ];
-                }),
-            ];
-        }),
-    ]);
-}
+                            'images' => $v->images->map(function ($img) {
+                                return [
+                                    'id'        => $img->id,
+                                    'image_url' => asset('storage/' . $img->image_path),
+                                ];
+                            }),
+                        ];
+                    }),
+                ];
+            }),
+        ]);
+    }
 
     public function collectionssss(Request $request)
     {

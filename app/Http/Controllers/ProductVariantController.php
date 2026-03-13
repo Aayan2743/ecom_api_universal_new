@@ -16,36 +16,66 @@ use Illuminate\Support\Str;
 class ProductVariantController extends Controller
 {
 
+    private function generateEAN13()
+    {
+        do {
 
-private function generateEAN13()
-{
-    do {
+            // 12 digit base number
+            $base = '89' . str_pad(mt_rand(0, 9999999999), 10, '0', STR_PAD_LEFT);
 
-        // 12 digit base number
-        $base = '89' . str_pad(mt_rand(0, 9999999999), 10, '0', STR_PAD_LEFT);
+            $digits = str_split($base);
+            $odd    = 0;
+            $even   = 0;
 
-        $digits = str_split($base);
-        $odd = 0;
-        $even = 0;
+            foreach ($digits as $index => $digit) {
 
-        foreach ($digits as $index => $digit) {
-
-            if (($index + 1) % 2 == 0) {
-                $even += $digit;
-            } else {
-                $odd += $digit;
+                if (($index + 1) % 2 == 0) {
+                    $even += $digit;
+                } else {
+                    $odd += $digit;
+                }
             }
-        }
 
-        $total = $odd + ($even * 3);
-        $checksum = (10 - ($total % 10)) % 10;
+            $total    = $odd + ($even * 3);
+            $checksum = (10 - ($total % 10)) % 10;
 
-        $ean13 = $base . $checksum;
+            $ean13  = $base . $checksum;
 
-    } while (\App\Models\ProductBarcode::where('barcode', $ean13)->exists());
+        } while (\App\Models\ProductBarcode::where('barcode', $ean13)->exists());
 
-    return $ean13;
-}
+        return $ean13;
+    }
+
+    private function generateEAN8()
+    {
+        do {
+
+            // generate 7 digit base number
+            $base = str_pad(mt_rand(0, 9999999), 7, '0', STR_PAD_LEFT);
+
+            $digits = str_split($base);
+
+            $odd  = 0;
+            $even = 0;
+
+            foreach ($digits as $i => $d) {
+                if (($i + 1) % 2 == 0) {
+                    $even += $d;
+                } else {
+                    $odd += $d;
+                }
+            }
+
+            // EAN8 checksum formula
+            $total     = ($odd * 3) + $even;
+            $checksum  = (10 - ($total % 10)) % 10;
+
+            $ean = $base . $checksum;
+
+        } while (ProductBarcode::where('barcode', $ean)->exists());
+
+        return $ean;
+    }
 
     public function store(Request $request, Product $product)
     {
@@ -105,16 +135,16 @@ private function generateEAN13()
 
                 $qty = $variant['quantity'] ?? 0;
 
-                    for ($i = 1; $i <= $qty; $i++) {
+                for ($i = 1; $i <= $qty; $i++) {
 
-                        $barcode = $this->generateEAN13();
+                    $barcode = $this->generateEAN8();
 
-                        ProductBarcode::create([
-                            'variant_id' => $combo->id,
-                            'barcode'    => $barcode,
-                            'is_used'    => 0
-                        ]);
-                    }
+                    ProductBarcode::create([
+                        'variant_id' => $combo->id,
+                        'barcode'    => $barcode,
+                        'is_used'    => 0,
+                    ]);
+                }
 
                 // ✅ Variant Images
                 if ($request->hasFile("variant_images.$index")) {

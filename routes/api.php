@@ -18,6 +18,7 @@ use App\Http\Controllers\OtpAuthController;
 use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\phonepaycontroller;
 use App\Http\Controllers\posController;
+use App\Http\Controllers\ProductBarcodeController;
 use App\Http\Controllers\ProductBulkImportController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductImageController;
@@ -36,26 +37,19 @@ use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\WhatsappSettingController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProductBarcodeController;
-
-
-
-
 
 // this is use for whatsapp payment link creation and webhook handling
-Route::get('/payment-success', [WhatsAppController::class,'checkPayment']);
-
+Route::get('/payment-success', [WhatsAppController::class, 'checkPayment']);
 
 // Route::get('/dashboard/orders', [OrderController::class,'allorders']);
 // // Route::get('/dashboard/orders', [OrderController::class,'dashboardOrders']);
 // Route::get('/dashboard/stats', [OrderController::class,'dashboardStats']);
 
-Route::get('/cart/online-orders', [OrderController::class,'allorders']);
-Route::get('/cart/online-orders/stats', [OrderController::class,'stats']);
-Route::get('/cart/online-orders/status-counts', [OrderController::class,'statusCounts']);
-Route::put('/cart/online-orders/{id}/status', [OrderController::class,'updateStatus']);
-Route::get('/cart/online-orders/{id}', [OrderController::class,'show']);
-
+Route::get('/cart/online-orders', [OrderController::class, 'allorders']);
+Route::get('/cart/online-orders/stats', [OrderController::class, 'stats']);
+Route::get('/cart/online-orders/status-counts', [OrderController::class, 'statusCounts']);
+Route::put('/cart/online-orders/{id}/status', [OrderController::class, 'updateStatus']);
+Route::get('/cart/online-orders/{id}', [OrderController::class, 'show']);
 
 Route::post('/payment/create', [phonepaycontroller::class, 'create']);
 Route::get('/delete-chat-sessions', [WhatsAppController::class, 'deleteAllChatSessions']);
@@ -64,8 +58,7 @@ Route::get('/payment/status/{transactionId}',
 
 Route::post('/webhook', [CartController::class, 'razorpayWebhook']);
 
-
-Route::get('/test-whatsapp', function(App\Services\Messenger360Service $messenger){
+Route::get('/test-whatsapp', function (App\Services\Messenger360Service $messenger) {
 
     $response = $messenger->send(
         "918919273834",
@@ -215,10 +208,15 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     // product variant routes
     Route::post('product/create-variation/{product}', [ProductVariantController::class, 'store']);
     Route::post('product/update-variation/{product}', [ProductVariantController::class, 'syncVariations']);
-    Route::get('product/generate-old-barcodes',[ProductBarcodeController::class,'generateOldBarcodes']);
+    Route::get('product/generate-old-barcodes', [ProductBarcodeController::class, 'generateOldBarcodes']);
 
-    Route::get('product/print-barcode/{variantId}', [ProductBarcodeController::class,'printBarcodes']);
-    Route::get('product/product-by-barcode/{barcode}', [ProductBarcodeController::class,'productByBarcode']);
+    Route::get('product/print-barcode/{variantId}', [ProductBarcodeController::class, 'printBarcodes']);
+    Route::get('product/product-by-barcode/{barcode}', [ProductBarcodeController::class, 'productByBarcode']);
+
+    Route::get(
+        'product/print-single-barcode/{barcode}',
+        [ProductBarcodeController::class, 'printSingleBarcode']
+    );
 
 // Product SEO Meta Management
 

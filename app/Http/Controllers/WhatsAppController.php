@@ -506,7 +506,7 @@ if($message == '0' || $message == 'back' || $message == 'b'){
     }
 
     $page  = $data['page'] ?? 1;
-    $limit = 5;
+    $limit = 100;
 
     $products = Product::where('category_id',$data['category_id'])
         ->skip(($page-1)*$limit)
