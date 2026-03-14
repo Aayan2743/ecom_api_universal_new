@@ -22,6 +22,10 @@ class Sale extends Model
         'tracking_number',
         'shipping_partner',
         'order_from',
+        'dead_weight',
+        'volumetric_weight',
+        'courier_number',
+        'awb_no',
     ];
 
     protected $casts = [
@@ -31,6 +35,8 @@ class Sale extends Model
         'grand_total'               => 'decimal:2',
         'paid_amount'               => 'decimal:2',
         'change_amount'             => 'decimal:2',
+        'dead_weight'               => 'decimal:2',
+        'volumetric_weight'         => 'decimal:2',
         'shipping_address_snapshot' => 'array',
     ];
 

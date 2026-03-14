@@ -160,7 +160,12 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     Route::post('/shipping', [ShippingController::class, 'store']);
     Route::get('/enabled-couriers', [ShippingController::class, 'enabledCouriers']);
     Route::post('/send-courier/{id}', [ShippingController::class, 'sendCourier']);
+    Route::post('/rate-card', [ShippingController::class, 'rateCard']);
+    Route::post(
+    '/assign-courier',
+    [ShippingController::class,'assignCourier']);
 
+    Route::post('/reset-courier/{id}', [ShippingController::class, 'resetCourier']);
     // Coupon Management
     Route::get('/cart/list-coupon', [CouponController::class, 'index']);
     Route::post('/cart/create-coupon', [CouponController::class, 'store']);
@@ -186,6 +191,7 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
 
     // Product Management
     Route::get('products', [ProductController::class, 'index']);
+    Route::get('products_with_percentge', [ProductController::class, 'index_with_percentage']);
     Route::get('/pos-products', [ProductController::class, 'posProducts']);
     Route::get('/product/fetch-products-by-id/{id}', [ProductController::class, 'fetchById']);
     Route::post('create-product', [ProductController::class, 'store']);
@@ -332,6 +338,7 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
 Route::prefix('ecom')->group(function () {
     Route::get('menu', [menuController::class, 'menu']);
     Route::get('products', [menuController::class, 'products']);
+    Route::get('products-percentage', [menuController::class, 'products_percentage']);
     Route::get('products-main', [menuController::class, 'products_main']);
 
     // app settion globel

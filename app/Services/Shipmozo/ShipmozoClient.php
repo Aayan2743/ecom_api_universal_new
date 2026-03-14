@@ -64,4 +64,14 @@ class ShipmozoClient
     {
         return $this->request('get', '/track/' . $trackingId);
     }
+
+    public function rateCalculator(array $payload)
+        {
+            return $this->request('post', '/rate-calculator', $payload);
+        }
+
+        public function assignCourier(array $payload)
+{
+    return $this->request('post', '/assign-courier', $payload);
+}
 }

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\EnvHelper;
+use App\Models\Order;
 use App\Models\Sale;
 use App\Services\Shipmozo\ShipmozoClient;
 use Illuminate\Http\Request;
@@ -165,136 +166,7 @@ class ShippingController extends Controller
     }
 
     /* ================= SEND COURIER ================= */
-    public function sendCourier_w(Request $request, $id)
-    {
 
-        // dd($request->all());
-        $validator = Validator::make($request->all(), [
-
-            'courier' => 'required|string',
-            'length'  => 'required|numeric',
-            'breadth' => 'required|numeric',
-            'height'  => 'required|numeric',
-            'weight'  => 'required|numeric',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors()->first(),
-            ], 422);
-        }
-
-        $order = Sale::findOrFail($id);
-
-        switch ($request->courier) {
-
-            case 'shiprocket':
-                // call Shiprocket service
-                break;
-
-            case 'shipmozo':
-                // call Shipmozo service
-                $shipmozo = new ShipmozoClient();
-
-                $address = is_array($order->shipping_address_snapshot)
-                    ? $order->shipping_address_snapshot
-                    : json_decode($order->shipping_address_snapshot, true);
-
-                if (! $address) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Shipping address missing',
-                    ]);
-                }
-                $productDetails = [];
-
-                foreach ($order->items as $item) {
-                    $productDetails[] = [
-                        "name"             => $item->product_name,
-                        "sku_number"       => $item->sku ?? (string) $item->product_id,
-                        "quantity"         => (int) $item->quantity,
-                        "discount"         => (string) $item->discount,
-                        "hsn"              => "",
-                        "unit_price"       => (float) $item->price,
-                        "product_category" => "Other",
-                    ];
-                }
-
-                $payload = [
-                    "order_id"                   => (string) $order->invoice_number,
-                    "order_date"                 => now()->format('Y-m-d'),
-                    "order_type"                 => "ESSENTIALS",
-
-                    "consignee_name"             => $address['name'],
-                    "consignee_phone"            => (string) $address['phone'],
-                    "consignee_alternate_phone"  => "",
-                    "consignee_email"            => "",
-                    "consignee_address_line_one" => $address['address'],
-                    "consignee_address_line_two" => "",
-                    "consignee_pin_code"         => (string) $address['pincode'],
-                    "consignee_city"             => $address['city'],
-                    "consignee_state"            => $address['state'],
-
-                    "product_detail"             => $productDetails,
-
-                    "payment_type"               => $order->payment_method === 'cod'
-                        ? "COD"
-                        : "PREPAID",
-
-                    "cod_amount"                 => $order->payment_method === 'cod'
-                        ? (float) $order->grand_total
-                        : "",
-
-                    "shipping_charges"           => "",
-                    "weight"                     => (float) $request->weight,
-                    "length"                     => (float) $request->length,
-                    "width"                      => (float) $request->breadth,
-                    "height"                     => (float) $request->height,
-                    "warehouse_id"               => "72958",
-                    "gst_ewaybill_number"        => "",
-                    "gstin_number"               => "",
-                ];
-
-                $response = $shipmozo->createOrder($payload);
-
-                \Log::info('Shipmozo Response Full', $response);
-                if ($response['result'] !== "1") {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $response['message'] ?? 'Shipmozo failed',
-                    ]);
-                }
-
-                /* ================= SAVE INTO SALES TABLE ================= */
-
-                $order->tracking_number  = $response['data']['order_id']; // Shipmozo tracking id
-                $order->shipping_partner = 'shipmozo';
-                $order->status           = 'shipped';
-
-                $order->save();
-
-                break;
-
-            case 'delhivery':
-                // call Delhivery service
-                break;
-
-            default:
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid courier selected',
-                ]);
-        }
-
-        $order->status = 'shipped';
-        $order->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Courier order created successfully',
-        ]);
-    }
 
     public function sendCourier(Request $request, $id)
     {
@@ -338,7 +210,7 @@ class ShippingController extends Controller
 
                 /* ================= WEIGHT CALCULATIONS ================= */
 
-                $deadWeight = (float) $request->weight;
+                $deadWeight = (float) ($request->weight*1000);
 
                 $length  = (float) $request->length;
                 $breadth = (float) $request->breadth;
@@ -422,7 +294,7 @@ class ShippingController extends Controller
                 $order->tracking_number   = $response['data']['order_id'];
                 $order->shipping_partner  = 'shipmozo';
                 $order->status            = 'shipped';
-                $order->dead_weight       = $deadWeight;
+                $order->dead_weight       = ($deadWeight/1000);
                 $order->volumetric_weight = $volumetricWeight;
 
                 $order->save();
@@ -445,4 +317,210 @@ class ShippingController extends Controller
             'message' => 'Courier order created successfully',
         ]);
     }
+
+        /* ================= GET RATE CARDS SHIPMOZO COURIER ================= */
+
+
+
+public function rateCard(Request $request, ShipmozoClient $shipmozo)
+{
+
+    $order = Sale::findOrFail($request->order_id);
+                // dd($order->shipping_address_snapshot);
+    // decode shipping address
+    // $address = json_decode($order->shipping_address_snapshot, true);
+    $address = $order->shipping_address_snapshot;
+
+
+
+    // dd($order->dead_weight, $order->volumetric_weight);
+
+
+    $deadWeight = $order->dead_weight ?? 0.5;
+    $volWeight  = $order->volumetric_weight ?? 0.5;
+
+    // chargeable weight
+    $weight = max($deadWeight, $volWeight) * 1000;
+    //  dd($weight);
+
+
+    $payload = [
+        "order_id" => "",
+
+        "pickup_pincode" => env('SHIPMOZO_PICKUP_PINCODE', '524004'),
+        "delivery_pincode" => $address['pincode'] ?? "",
+
+        "payment_type" => "PREPAID",
+        "shipment_type" => "FORWARD",
+
+        "order_amount" => $order->grand_total,
+
+        "type_of_package" => "SPS",
+        "rov_type" => "ROV_OWNER",
+
+        "cod_amount" => "",
+
+        "weight" => $weight,
+
+        "dimensions" => [
+            [
+                "no_of_box" => 1,
+                "length" => 10,
+                "width" => 10,
+                "height" => 10
+            ]
+        ]
+    ];
+
+    //  dd($payload);
+
+    $rates = $shipmozo->rateCalculator($payload);
+
+    if (($rates['result'] ?? '0') === '0') {
+    return response()->json([
+        'success' => false,
+        'message' => $rates['message'] ?? 'Failed to fetch courier rates',
+        'data' => []
+    ]);
+}
+
+
+    return response()->json([
+        'success' => true,
+        'data' => $rates
+    ]);
+}
+
+
+public function assignCourier(Request $request, ShipmozoClient $shipmozo)
+{
+
+
+
+    $validator = Validator::make($request->all(), [
+        'order_id'   => 'required',
+        'courier_id' => 'required'
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors'  => $validator->errors()->first(),
+        ], 422);
+    }
+
+    $order = Sale::where('tracking_number', $request->order_id)->first();
+
+    if(!$order){
+        return response()->json([
+            'success' => false,
+            'message' => 'Order not found'
+        ]);
+    }
+
+    try {
+
+
+        $payload = [
+            "order_id"   => $request->order_id,
+            "courier_id" => $request->courier_id
+        ];
+
+        $response = $shipmozo->assignCourier($payload);
+
+         if(($response['result'] ?? '0') == "1"){
+
+            $data = $response['data'];
+
+            // $order->shipping_partner = $data['courier'] ?? null;
+            $order->awb_no           = $data['awb_number'] ?? null;
+            $order->courier_number   = $data['courier'] ?? null;
+            $order->status           = "ASSIGNED COURIER";
+
+            $order->save();
+
+
+
+            if(($response['result'] ?? '0') == "1"){
+
+    $data = $response['data'];
+
+    $order->shipping_partner = $data['courier'] ?? null;
+    $order->awb_no = $data['awb_number'] ?? null;
+    $order->courier_number = $data['order_id'] ?? null;
+    $order->status = "shipped";
+
+    $order->save();
+
+    // Send WhatsApp Alert
+    $phone = $order->customer_phone;
+
+  $message = "📦 Your order has been shipped!\n\n"
+    ."Courier: ".$order->shipping_partner."\n"
+    ."AWB Number: ".$order->awb_no."\n\n"
+    ."Thank you for shopping with us.";
+
+    app(\App\Services\Messenger360Service::class)->send($phone, $message);
+
+    return response()->json([
+        "success" => true,
+        "message" => "Courier assigned successfully",
+        "data" => $data
+    ]);
+}
+
+            return response()->json([
+                "success" => true,
+                "message" => "Courier assigned successfully",
+                "data" => $data
+            ]);
+        }
+
+        return response()->json([
+            "success" => false,
+            "message" => $response['message'] ?? "Failed to assign courier"
+        ]);
+
+
+
+
+
+
+
+
+
+    } catch (\Exception $e){
+
+        return response()->json([
+            "success" => false,
+            "message" => $e->getMessage()
+        ]);
+    }
+}
+
+
+
+public function resetCourier($id)
+{
+    $order = Sale::find($id);
+
+    if (!$order) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Order not found'
+        ]);
+    }
+
+    $order->shipping_partner = null;
+    $order->awb_no = null;
+    $order->courier_number = null;
+    $order->status = 'created';
+
+    $order->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Courier removed successfully'
+    ]);
+}
 }

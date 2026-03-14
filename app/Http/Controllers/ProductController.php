@@ -7,12 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
 
     public function index(Request $request)
     {
+
+
         $search  = $request->search;
         $perPage = $request->perPage ?? 10;
 
@@ -92,6 +95,90 @@ class ProductController extends Controller
             ],
         ]);
     }
+
+
+public function index_with_percentage(Request $request)
+{
+    $search  = $request->search;
+    $perPage = $request->perPage ?? 10;
+
+    $products = Product::query()
+        ->whereNull('deleted_at')
+
+        ->when($search, function ($q) use ($search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('name', 'like', "%{$search}%")
+                    ->orWhere('slug', 'like', "%{$search}%");
+            });
+        })
+
+        ->with([
+            'category:id,name,parent_id',
+            'category.parent:id,name',
+            'brand:id,name',
+            'images:id,product_id,image_path,is_primary',
+            'sections:id,name,slug',
+        ])
+
+        // MIN price after discount
+        ->withMin(
+            'variantCombinations as min_price_after_discount',
+            DB::raw('(extra_price - (extra_price * discount / 100))')
+        )
+
+        // MAX price after discount
+        ->withMax(
+            'variantCombinations as max_price_after_discount',
+            DB::raw('(extra_price - (extra_price * discount / 100))')
+        )
+
+        ->orderBy('id', 'desc')
+        ->paginate($perPage);
+
+    return response()->json([
+        'data' => $products->getCollection()->map(function ($p) {
+
+            $image = $p->images->firstWhere('is_primary', true) ?? $p->images->first();
+
+            return [
+                'id'            => $p->id,
+                'name'          => $p->name,
+                'slug'          => $p->slug,
+
+                'category_id'   => $p->category_id,
+                'category_name' => $p->category?->name,
+                'category_main' => $p->category?->parent?->name,
+
+                'brand_id'      => $p->brand_id,
+                'brand_name'    => $p->brand?->name,
+
+                // PRICE RANGE AFTER DISCOUNT
+                'min_price' => round($p->min_price_after_discount ?? 0, 2),
+                'max_price' => round($p->max_price_after_discount ?? 0, 2),
+
+                 'price_range' => '₹' . round($p->min_price_after_discount ?? 0, 2) .
+                 ' - ₹' . round($p->max_price_after_discount ?? 0, 2),
+
+                'image_url' => $image?->image_path
+                    ? asset('storage/' . $image->image_path)
+                    : null,
+
+                'status' => $p->status,
+
+                'sections' => $p->sections->map(fn($s) => [
+                    'id'   => $s->id,
+                    'name' => $s->name,
+                    'slug' => $s->slug,
+                ])->values(),
+            ];
+        }),
+
+        'pagination' => [
+            'currentPage' => $products->currentPage(),
+            'totalPages'  => $products->lastPage(),
+        ],
+    ]);
+}
 
     public function fetchById($id)
     {
@@ -204,16 +291,22 @@ class ProductController extends Controller
 
     /* ================= STORE ================= */
 
-    public function store_w(Request $request)
+  public function store(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
-            'name'             => 'required|string|max:255',
+            // 'name'             => 'required|string|max:255',
+              'name'             => 'required|string|max:255|unique:products,name',
             'category_id'      => 'required|exists:categories,id',
             'brand_id'         => 'nullable|exists:brands,id',
+
+            'purchase_price'   => 'nullable|numeric|min:0',
+            'base_price'       => 'nullable|numeric|min:0',
+            'discount'         => 'nullable|numeric|min:0',
             'status'           => 'nullable|in:draft,active,inactive',
+
             'specifications'   => 'nullable|array',
             'specifications.*' => 'nullable|string',
+
             'extra_details'    => 'nullable|array',
         ]);
 
@@ -224,21 +317,28 @@ class ProductController extends Controller
             ], 422);
         }
 
-        // Generate unique slug
-        $slug = Str::slug($request->name);
-        $i    = 1;
 
-        while (Product::where('slug', $slug)->exists()) {
-            $slug = Str::slug($request->name) . '-' . $i;
-            $i++;
-        }
+
+         $slug = Str::slug($request->name);
+
+    // Check if slug exists
+    $count = Product::where('slug', $slug)->count();
+
+    if ($count > 0) {
+        $slug = $slug . '-' . ($count + 1);
+    }
 
         $product = Product::create([
             'name'           => $request->name,
             'slug'           => $slug,
             'category_id'    => $request->category_id,
             'brand_id'       => $request->brand_id,
+
+            'purchase_price' => $request->purchase_price,
+            'base_price'     => $request->base_price,
+            'discount'       => $request->discount,
             'status'         => $request->status ?? 'draft',
+
             'specifications' => $request->specifications ?? [],
             'extra_details'  => $request->extra_details ?? [],
         ]);
@@ -252,167 +352,79 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name'             => 'required|string|max:255|unique:products,name',
-            'category_id'      => 'required|exists:categories,id',
-            'brand_id'         => 'nullable|exists:brands,id',
-            'status'           => 'nullable|in:draft,active,inactive',
-            'specifications'   => 'nullable|array',
-            'specifications.*' => 'nullable|string',
-            'extra_details'    => 'nullable|array',
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors()->first(),
-            ], 422);
-        }
-
-        // generate slug
-        $slug = Str::slug($request->name);
-
-        // check if slug exists
-        if (Product::where('slug', $slug)->exists()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => 'Product already exists',
-            ], 422);
-        }
-
-        $product = Product::create([
-            'name'           => $request->name,
-            'slug'           => $slug,
-            'category_id'    => $request->category_id,
-            'brand_id'       => $request->brand_id,
-            'status'         => $request->status ?? 'draft',
-            'specifications' => $request->specifications ?? [],
-            'extra_details'  => $request->extra_details ?? [],
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product created successfully',
-            'product' => [
-                'id' => $product->id,
-            ],
-        ], 201);
-    }
 
     /* ================= UPDATE ================= */
-    public function update_w(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'name'             => 'required|string|max:255',
-            'category_id'      => 'required|exists:categories,id',
-            'brand_id'         => 'nullable|exists:brands,id',
 
-            // 'purchase_price'   => 'nullable|numeric|min:0',
-            // 'base_price'       => 'nullable|numeric|min:0',
-            // 'discount'         => 'nullable|numeric|min:0',
-            'status'           => 'nullable|in:draft,active,inactive',
 
-            'specifications'   => 'nullable|array',
-            'specifications.*' => 'nullable|string',
 
-            'extra_details'    => 'nullable|array',
-        ]);
+     public function update(Request $request, $id)
+{
+    $product = Product::findOrFail($id);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors()->first(),
-            ], 422);
-        }
+    $validator = Validator::make($request->all(), [
+        'name'        => 'required|string|max:255|unique:products,name,' . $id,
+        'category_id' => 'required|exists:categories,id',
+        'brand_id'    => 'nullable|exists:brands,id',
 
-        $product->update([
-            'name'           => $request->name,
-            'slug'           => Str::slug($request->name),
-            'category_id'    => $request->category_id,
-            'brand_id'       => $request->brand_id,
+        'purchase_price' => 'nullable|numeric|min:0',
+        'base_price'     => 'nullable|numeric|min:0',
+        'discount'       => 'nullable|numeric|min:0',
+        'status'         => 'nullable|in:draft,active,inactive',
 
-            // 'purchase_price' => $request->purchase_price,
-            // 'base_price'     => $request->base_price,
-            // 'discount'       => $request->discount,
-            'status'         => $request->status ?? $product->status,
+        'specifications'   => 'nullable|array',
+        'specifications.*' => 'nullable|string',
 
-            'specifications' => $request->specifications ?? [],
-            'extra_details'  => $request->extra_details ?? [],
-        ]);
+        'extra_details' => 'nullable|array',
+    ]);
 
+    if ($validator->fails()) {
         return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-            'product' => [
-                'id' => $product->id,
-            ],
-        ]);
+            'success' => false,
+            'errors'  => $validator->errors()->first(),
+        ], 422);
     }
 
-    public function update(Request $request, $id)
-    {
-        $product = Product::findOrFail($id);
+    // Generate unique slug
+    $slug = Str::slug($request->name);
+    $originalSlug = $slug;
+    $i = 1;
 
-        $validator = Validator::make($request->all(), [
-            'name'             => 'required|string|max:255|unique:products,name,' . $id,
-            'category_id'      => 'required|exists:categories,id',
-            'brand_id'         => 'nullable|exists:brands,id',
-            'status'           => 'nullable|in:draft,active,inactive',
-            'specifications'   => 'nullable|array',
-            'specifications.*' => 'nullable|string',
-            'extra_details'    => 'nullable|array',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors()->first(),
-            ], 422);
-        }
-
-        $slug = Str::slug($request->name);
-
-        // check duplicate slug except current product
-        $exists = Product::where('slug', $slug)
-            ->where('id', '!=', $id)
-            ->exists();
-
-        if ($exists) {
-            return response()->json([
-                'success' => false,
-                'errors'  => 'Product with this name already exists.',
-            ], 422);
-        }
-
-        $product->update([
-            'name'           => $request->name,
-            'slug'           => $slug,
-            'category_id'    => $request->category_id,
-            'brand_id'       => $request->brand_id,
-            'status'         => $request->status ?? $product->status,
-            'specifications' => $request->specifications ?? [],
-            'extra_details'  => $request->extra_details ?? [],
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-            'product' => [
-                'id' => $product->id,
-            ],
-        ]);
+    while (Product::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+        $slug = $originalSlug . '-' . $i++;
     }
+
+    $product->update([
+        'name'           => $request->name,
+        'slug'           => $slug,
+        'category_id'    => $request->category_id,
+        'brand_id'       => $request->brand_id,
+
+        'purchase_price' => $request->purchase_price,
+        'base_price'     => $request->base_price,
+        'discount'       => $request->discount,
+        'status'         => $request->status ?? $product->status,
+
+        'specifications' => $request->specifications ?? [],
+        'extra_details'  => $request->extra_details ?? [],
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Product updated successfully',
+        'product' => [
+            'id' => $product->id,
+        ],
+    ]);
+}
 
     /* ================= DELETE ================= */
 
-    public function destroy($id)
-    {
-        Product::findOrFail($id)->delete();
-    }
+   public function destroy($id)
+{
+    Product::findOrFail($id)->forceDelete();
+}
     /* ================= RESTORE ================= */
     public function restore($id)
     {
