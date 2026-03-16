@@ -610,6 +610,8 @@ public function index_with_percentage(Request $request)
                             'name'   => $variationName ?: $v->sku,
 
                             'price'  => $v->extra_price - $v->discount,
+                            'MRP'  => $v->extra_price,
+                            'discount'  => $v->discount,
                             'stock'  => $v->quantity,
 
                             'images' => $v->images->map(function ($img) {

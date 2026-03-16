@@ -531,6 +531,8 @@ PRINT 1,1
                     "name"   => $variant->values->pluck('value')->implode(' '),
                     // "price" => $variant->purchase_price,
                     "price"  => $variant->extra_price - $variant->discount,
+                    "MRP"  => $variant->extra_price,
+                    "discount"  => $variant->discount,
                     "stock"  => $variant->quantity,
                     "images" => $variant->images->map(function ($img) {
                         return asset('storage/' . $img->image_path);

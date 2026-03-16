@@ -26,6 +26,8 @@ class Sale extends Model
         'volumetric_weight',
         'courier_number',
         'awb_no',
+        'billed_discount',
+        'delivery_charge',
     ];
 
     protected $casts = [

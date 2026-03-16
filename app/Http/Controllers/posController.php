@@ -28,10 +28,13 @@ class posController extends Controller
     public function store(Request $request)
     {
 
+    // dd("Ddfgdfgdfgfdgfdg");
+
         $validator = Validator::make($request->all(), [
             'customer_id'              => 'nullable|exists:users,id',
             'payment_method'           => 'required|string',
             'paid_amount'              => 'required|numeric|min:0',
+            'delivery_fee' => 'nullable|numeric|min:0',
 
             'customer_name'            => 'nullable|string|max:255',
             'customer_phone'           => 'nullable|string|max:20',
@@ -64,65 +67,122 @@ class posController extends Controller
 
         try {
 
-            $subtotal      = 0;
-            $discountTotal = 0;
-            $taxTotal      = 0;
+            // $subtotal      = 0;
+            // $discountTotal = 0;
+            // $taxTotal      = 0;
 
-            $itemsData = [];
+            // $itemsData = [];
 
-            foreach ($request->items as $item) {
+            // foreach ($request->items as $item) {
 
-                $variant = ProductVariantCombination::with('product', 'images')
-                    ->lockForUpdate()
-                    ->findOrFail($item['variant_id']);
+            //     $variant = ProductVariantCombination::with('product', 'images')
+            //         ->lockForUpdate()
+            //         ->findOrFail($item['variant_id']);
 
-                // 🚫 Prevent overselling
-                if ($variant->quantity < $item['qty']) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Insufficient stock for {$variant->sku}",
-                    ], 422);
-                }
+            //     // 🚫 Prevent overselling
+            //     if ($variant->quantity < $item['qty']) {
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => "Insufficient stock for {$variant->sku}",
+            //         ], 422);
+            //     }
 
-                $price    = $variant->extra_price;
-                $discount = $variant->discount ?? 0;
-                $tax      = 0; // Add GST logic if needed
+            //     $price    = $variant->extra_price;
+            //     $discount = $variant->discount ?? 0;
+            //     $tax      = 0; // Add GST logic if needed
 
-                $lineTotal = ($price - $discount) * $item['qty'];
+            //     $lineTotal = ($price - $discount) * $item['qty'];
 
-                $subtotal      += $price * $item['qty'];
-                $discountTotal += $discount * $item['qty'];
+            //     $subtotal      += $price * $item['qty'];
+            //     $discountTotal += $discount * $item['qty'];
 
-                $itemsData[]  = [
-                    'variant'  => $variant,
-                    'price'    => $price,
-                    'discount' => $discount,
-                    'tax'      => $tax,
-                    'qty'      => $item['qty'],
-                    'total'    => $lineTotal,
-                ];
-            }
+            //     $itemsData[]  = [
+            //         'variant'  => $variant,
+            //         'price'    => $price,
+            //         'discount' => $discount,
+            //         'tax'      => $tax,
+            //         'qty'      => $item['qty'],
+            //         'total'    => $lineTotal,
+            //     ];
+            // }
 
-            $grandTotal   = $subtotal - $discountTotal + $taxTotal;
-            $changeAmount = $request->paid_amount - $grandTotal;
+            // $grandTotal   = $subtotal - $discountTotal + $taxTotal;
+            // $changeAmount = $request->paid_amount - $grandTotal;
 
-            if ($changeAmount < 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Paid amount is insufficient',
-                ], 422);
-            }
+            // if ($changeAmount < 0) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Paid amount is insufficient',
+            //     ], 422);
+            // }
 
-            // ✅ Build Address Snapshot
-            // $addressSnapshot = [
-            //     'name'    => $request->customer_name,
-            //     'phone'   => $request->customer_phone,
-            //     'address' => $request->address_snapshot['address'],
-            //     'city'    => $request->address_snapshot['city'],
-            //     'state'   => $request->address_snapshot['state'],
-            //     'country' => $request->address_snapshot['country'] ?? 'India',
-            //     'pincode' => $request->address_snapshot['pincode'],
-            // ];
+
+$subtotal     = 0;
+$itemDiscount = 0;
+$taxTotal     = 0;
+
+$itemsData = [];
+
+foreach ($request->items as $item) {
+
+    $variant = ProductVariantCombination::with('product', 'images')
+        ->lockForUpdate()
+        ->findOrFail($item['variant_id']);
+
+    if ($variant->quantity < $item['qty']) {
+        return response()->json([
+            'success' => false,
+            'message' => "Insufficient stock for {$variant->sku}",
+        ], 422);
+    }
+
+    $price    = $variant->extra_price;
+    $discount = $variant->discount ?? 0;
+    $tax      = 0;
+
+    $lineSubtotal = $price * $item['qty'];
+    $lineDiscount = $discount * $item['qty'];
+
+    $lineTotal = ($price - $discount) * $item['qty'];
+
+    $subtotal     += $lineSubtotal;
+    $itemDiscount += $lineDiscount;
+
+    $itemsData[] = [
+        'variant'  => $variant,
+        'price'    => $price,
+        'discount' => $discount,
+        'tax'      => $tax,
+        'qty'      => $item['qty'],
+        'total'    => $lineTotal,
+    ];
+}
+
+$billingDiscount = $request->discount_total ?? 0;
+
+$itemsTotal = $subtotal - $itemDiscount;
+
+$grandTotal = $itemsTotal - $billingDiscount + $taxTotal;
+
+$paidAmount = $request->paid_amount;
+
+if ($request->payment_method === 'cash') {
+
+    if ($paidAmount < $grandTotal) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Paid amount is insufficient',
+        ], 422);
+    }
+
+    $changeAmount = $paidAmount - $grandTotal;
+
+} else {
+
+    $paidAmount = $grandTotal;
+    $changeAmount = 0;
+}
+
 
             $address = $request->address_snapshot ?? [];
 
@@ -141,7 +201,9 @@ class posController extends Controller
                 'invoice_number'            => 'INV-' . now()->format('YmdHis') . '-' . rand(100, 999),
                 'customer_id'               => $request->customer_id,
                 'subtotal'                  => $subtotal,
-                'discount_total'            => $discountTotal,
+                'discount_total'            => $itemDiscount,
+                  'billed_discount' => $billingDiscount,
+                  'delivery_charge' => $request->deliveryFee ?? 0,
                 'tax_total'                 => $taxTotal,
                 'grand_total'               => $grandTotal,
 
@@ -305,22 +367,35 @@ class posController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Order created successfully',
-                'data'    => [
-                    'sale_id'        => $sale->id,
-                    'invoice_number' => $sale->invoice_number,
-                    'grand_total'    => $sale->grand_total,
-                    'subtotal'       => $sale->subtotal,
-                    'tax_total'      => $sale->tax_total,
-                    'items'          => $sale->items()->get()->map(function ($item) {
 
-                        return [
-                            'product_name' => $item->product_name,
-                            'qty'          => $item->quantity,
-                            'total'        => $item->total,
-                        ];
 
-                    }),
-                ],
+                'data' => [
+                'sale_id'        => $sale->id,
+                'invoice_number' => $sale->invoice_number,
+                'created_at'     => $sale->created_at,
+
+                'subtotal'       => $sale->subtotal,
+
+                'discount_total' => $sale->discount_total,   // product discount
+                'billed_discount'=> $sale->billed_discount,  // bill discount
+                'delivery_charge' => $sale->delivery_charge,  // delivery charge
+
+                'tax_total'      => $sale->tax_total,
+                'grand_total'    => $sale->grand_total,
+                   'shipping_address_snapshot' => $sale->shipping_address_snapshot,
+
+                'items' => $sale->items()->get()->map(function ($item) {
+
+                    return [
+                        'product_name' => $item->product_name,
+                        'qty'          => $item->quantity,
+                        'discount'     => $item->discount,   // product discount
+                        'total_discount'     => $item->discount * $item->quantity,   // product discount
+                        'total'        => $item->total,
+                    ];
+
+    }),
+],
             ]);
 
         } catch (\Exception $e) {
@@ -336,315 +411,268 @@ class posController extends Controller
     }
 
 
-     public function storeOncall(Request $request)
-    {
 
-        $validator = Validator::make($request->all(), [
-            'customer_id'              => 'nullable|exists:users,id',
-            'payment_method'           => 'required|string',
-            'paid_amount'              => 'required|numeric|min:0',
 
-            'customer_name'            => 'nullable|string|max:255',
-            'customer_phone'           => 'nullable|string|max:20',
+    public function storeOncall(Request $request)
+{
 
-            // ✅ Address JSON validation
-            'address_snapshot'         => 'nullable|array',
-            'address_snapshot.address' => 'nullable|string',
-            'address_snapshot.city'    => 'nullable|string',
-            'address_snapshot.state'   => 'nullable|string',
-            'address_snapshot.pincode' => 'nullable|string',
+    $validator = Validator::make($request->all(), [
+        'customer_id' => 'nullable|exists:users,id',
+        'payment_method' => 'required|string',
+        'paid_amount' => 'required|numeric|min:0',
+          'delivery_fee' => 'nullable|numeric|min:0',
 
-            'items'                    => 'required|array|min:1',
+        'customer_name' => 'nullable|string|max:255',
+        'customer_phone' => 'nullable|string|max:20',
 
-            'items.*.product_id'       => 'required|integer|exists:products,id',
-            'items.*.variant_id'       => 'required|integer|exists:product_variant_combinations,id',
-            'items.*.qty'              => 'required|integer|min:1',
+        'items' => 'required|array|min:1',
+        'items.*.product_id' => 'required|integer|exists:products,id',
+        'items.*.variant_id' => 'required|integer|exists:product_variant_combinations,id',
+        'items.*.qty' => 'required|integer|min:1',
+        'items.*.barcode_id' => 'nullable|exists:product_barcodes,id',
+    ]);
 
-            'items.*.barcode_id'       => 'nullable|exists:product_barcodes,id',
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors' => $validator->errors()->first(),
+        ], 422);
+    }
 
-        ]);
+    DB::beginTransaction();
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors()->first(),
-            ], 422);
-        }
+    try {
 
-        DB::beginTransaction();
+        $subtotal = 0;
+        $productDiscount = 0;
+        $taxTotal = 0;
 
-        try {
+        $itemsData = [];
 
-            $subtotal      = 0;
-            $discountTotal = 0;
-            $taxTotal      = 0;
+        foreach ($request->items as $item) {
 
-            $itemsData = [];
+            $variant = ProductVariantCombination::with('product', 'images')
+                ->lockForUpdate()
+                ->findOrFail($item['variant_id']);
 
-            foreach ($request->items as $item) {
-
-                $variant = ProductVariantCombination::with('product', 'images')
-                    ->lockForUpdate()
-                    ->findOrFail($item['variant_id']);
-
-                // 🚫 Prevent overselling
-                if ($variant->quantity < $item['qty']) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Insufficient stock for {$variant->sku}",
-                    ], 422);
-                }
-
-                $price    = $variant->extra_price;
-                $discount = $variant->discount ?? 0;
-                $tax      = 0; // Add GST logic if needed
-
-                $lineTotal = ($price - $discount) * $item['qty'];
-
-                $subtotal      += $price * $item['qty'];
-                $discountTotal += $discount * $item['qty'];
-
-                $itemsData[]  = [
-                    'variant'  => $variant,
-                    'price'    => $price,
-                    'discount' => $discount,
-                    'tax'      => $tax,
-                    'qty'      => $item['qty'],
-                    'total'    => $lineTotal,
-                ];
-            }
-
-            $grandTotal   = $subtotal - $discountTotal + $taxTotal;
-            $changeAmount = $request->paid_amount - $grandTotal;
-
-            if ($changeAmount < 0) {
+            if ($variant->quantity < $item['qty']) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Paid amount is insufficient',
+                    'message' => "Insufficient stock for {$variant->sku}",
                 ], 422);
             }
 
-            // ✅ Build Address Snapshot
-            // $addressSnapshot = [
-            //     'name'    => $request->customer_name,
-            //     'phone'   => $request->customer_phone,
-            //     'address' => $request->address_snapshot['address'],
-            //     'city'    => $request->address_snapshot['city'],
-            //     'state'   => $request->address_snapshot['state'],
-            //     'country' => $request->address_snapshot['country'] ?? 'India',
-            //     'pincode' => $request->address_snapshot['pincode'],
-            // ];
+            $price = $variant->extra_price;
+            $discount = $variant->discount ?? 0;
+            $tax = 0;
 
-            $address = $request->address_snapshot ?? [];
+            $lineSubtotal = $price * $item['qty'];
+            $lineDiscount = $discount * $item['qty'];
 
-            $addressSnapshot  = [
-                'name'    => $request->customer_name,
-                'phone'   => $request->customer_phone,
-                'address' => $address['address'] ?? null,
-                'city'    => $address['city'] ?? null,
-                'state'   => $address['state'] ?? null,
-                'country' => $address['country'] ?? 'India',
-                'pincode' => $address['pincode'] ?? null,
+            $lineTotal = ($price - $discount) * $item['qty'];
+
+            $subtotal += $lineSubtotal;
+            $productDiscount += $lineDiscount;
+
+            $itemsData[] = [
+                'variant' => $variant,
+                'price' => $price,
+                'discount' => $discount,
+                'tax' => $tax,
+                'qty' => $item['qty'],
+                'total' => $lineTotal,
             ];
-
-            // 🧾 Create Sale
-            $sale = Sale::create([
-                'invoice_number'            => 'INV-' . now()->format('YmdHis') . '-' . rand(100, 999),
-                'customer_id'               => $request->customer_id,
-                'subtotal'                  => $subtotal,
-                'discount_total'            => $discountTotal,
-                'tax_total'                 => $taxTotal,
-                'grand_total'               => $grandTotal,
-
-                'payment_method'            => $request->payment_method,
-                'paid_amount'               => $request->paid_amount,
-                'change_amount'             => $changeAmount,
-
-                'customer_name'             => $request->customer_name,
-                'customer_phone'            => $request->customer_phone,
-                // ✅ SAVE JSON COLUMN HERE
-                'shipping_address_snapshot' => $addressSnapshot,
-                'status'                    => 'created',
-                'order_from'                    => 'On-Call',
-            ]);
-
-            // 🧾 Save Sale Items + Deduct Stock
-            // foreach ($itemsData as $data) {
-
-            //     $variant = $data['variant'];
-
-            //     SaleItem::create([
-            //         'sale_id'                => $sale->id,
-
-            //         'product_id'             => $variant->product->id,
-            //         'variant_combination_id' => $variant->id,
-
-            //         'product_name'           => $variant->product->name,
-            //         'variant_name'           => $variant->sku,
-            //         'sku'                    => $variant->sku,
-
-            //         'product_image'          => optional($variant->images->first())->image_path
-            //             ? asset('storage/' . $variant->images->first()->image_path)
-            //             : null,
-
-            //         'price'                  => $data['price'],
-            //         'discount'               => $data['discount'],
-            //         'tax'                    => $data['tax'],
-
-            //         'quantity'               => $data['qty'],
-            //         'total'                  => $data['total'],
-            //     ]);
-
-            //     // 🔥 Deduct Stock
-            //     $variant->decrement('quantity', $data['qty']);
-            // }
-
-
-
-            foreach ($itemsData as $index => $data) {
-
-    $variant = $data['variant'];
-
-    SaleItem::create([
-        'sale_id'                => $sale->id,
-        'product_id'             => $variant->product->id,
-        'variant_combination_id' => $variant->id,
-        'product_name'           => $variant->product->name,
-        'variant_name'           => $variant->sku,
-        'sku'                    => $variant->sku,
-
-        'product_image'          => optional($variant->images->first())->image_path
-            ? asset('storage/' . $variant->images->first()->image_path)
-            : null,
-
-        'price'                  => $data['price'],
-        'discount'               => $data['discount'],
-        'tax'                    => $data['tax'],
-        'quantity'               => $data['qty'],
-        'total'                  => $data['total'],
-    ]);
-
-    // Deduct Stock
-    $variant->decrement('quantity', $data['qty']);
-
-    $barcodeId = $request->items[$index]['barcode_id'] ?? null;
-
-    /*
-    |--------------------------------------------------------------------------
-    | CASE 1 : Barcode Scanned
-    |--------------------------------------------------------------------------
-    */
-
-    if ($barcodeId) {
-
-        ProductBarcode::where('id', $barcodeId)
-            ->where('is_used', false)
-            ->update([
-                'is_used' => true,
-                // 'used_at' => now()
-            ]);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CASE 2 : Manual Add (No Barcode)
-    |--------------------------------------------------------------------------
-    */
-
-    else {
-
-        ProductBarcode::where('variant_id', $variant->id)
-            ->where('is_used', false)
-            ->limit($data['qty'])
-            ->update([
-                'is_used' => true,
-                // 'used_at' => now()
-            ]);
-    }
-}
-
-            DB::commit();
-
-            // return response()->json([
-            //     'success' => true,
-            //     'message' => 'Order created successfully',
-            //     'data'    => [
-            //         'sale_id'        => $sale->id,
-            //         'invoice_number' => $sale->invoice_number,
-            //         'grand_total'    => $sale->grand_total,
-            //     ],
-            // ]);
-
-
-            try {
-
-    if ($request->customer_phone) {
-
-        // $phone = '91' . ltrim($request->customer_phone, '0');
-        $phone = $request->customer_phone;
-
-        $message  = "🧾 *Order Invoice*\n";
-        $message .= "Invoice: {$sale->invoice_number}\n\n";
-
-        $message .= "📦 *Items*\n";
-
-        foreach ($sale->items as $item) {
-
-            $message .= "• {$item->product_name}\n";
-            $message .= "Qty: {$item->quantity}\n";
-            $message .= "Price: ₹{$item->price}\n";
-            $message .= "Total: ₹{$item->total}\n\n";
-
         }
 
-        $message .= "Subtotal: ₹{$sale->subtotal}\n";
-        $message .= "Tax: ₹{$sale->tax_total}\n";
-        $message .= "*Grand Total: ₹{$sale->grand_total}*\n\n";
+        /*
+        |--------------------------------------------------------------------------
+        | Billed Discount (POS discount)
+        |--------------------------------------------------------------------------
+        */
 
-        $message .= "🙏 *Thank you for visiting Sri Devi Herbals*\n";
-        $message .= "🌿 Welcome again!";
+        $billedDiscount = $request->discount_total ?? 0;
 
-        $this->messenger->send($phone, $message);
-    }
+        /*
+        |--------------------------------------------------------------------------
+        | Final Calculation
+        |--------------------------------------------------------------------------
+        */
 
-} catch (\Exception $e) {
+        $itemsTotal = $subtotal - $productDiscount;
 
-    Log::error("WhatsApp send failed: ".$e->getMessage());
+        $grandTotal = $itemsTotal - $billedDiscount + $taxTotal;
 
-}
+        $paidAmount = $request->paid_amount;
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Order created successfully',
-                'data'    => [
-                    'sale_id'        => $sale->id,
-                    'invoice_number' => $sale->invoice_number,
-                    'grand_total'    => $sale->grand_total,
-                    'subtotal'       => $sale->subtotal,
-                    'tax_total'      => $sale->tax_total,
-                    'items'          => $sale->items()->get()->map(function ($item) {
-
-                        return [
-                            'product_name' => $item->product_name,
-                            'qty'          => $item->quantity,
-                            'total'        => $item->total,
-                        ];
-
-                    }),
-                ],
-            ]);
-
-        } catch (\Exception $e) {
-
-            DB::rollBack();
-
+        if ($paidAmount < $grandTotal) {
             return response()->json([
                 'success' => false,
-                'message' => 'Something went wrong',
-                'error'   => $e->getMessage(),
-            ], 500);
+                'message' => 'Paid amount is insufficient',
+            ], 422);
         }
+
+        $changeAmount = $paidAmount - $grandTotal;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Address Snapshot
+        |--------------------------------------------------------------------------
+        */
+
+        $address = $request->address_snapshot ?? [];
+
+        $addressSnapshot = [
+            'name' => $request->customer_name,
+            'phone' => $request->customer_phone,
+            'address' => $address['address'] ?? null,
+            'city' => $address['city'] ?? null,
+            'state' => $address['state'] ?? null,
+            'country' => $address['country'] ?? 'India',
+            'pincode' => $address['pincode'] ?? null,
+        ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create Sale
+        |--------------------------------------------------------------------------
+        */
+
+        $sale = Sale::create([
+            'invoice_number' => 'INV-' . now()->format('YmdHis') . '-' . rand(100, 999),
+
+            'customer_id' => $request->customer_id,
+
+            'subtotal' => $subtotal,
+
+            'discount_total' => $productDiscount,
+
+            'billed_discount' => $billedDiscount,
+
+             'delivery_charge' => $request->deliveryFee ?? 0,
+
+            'tax_total' => $taxTotal,
+
+            'grand_total' => $grandTotal,
+
+            'payment_method' => $request->payment_method,
+            'paid_amount' => $paidAmount,
+            'change_amount' => $changeAmount,
+
+            'customer_name' => $request->customer_name,
+            'customer_phone' => $request->customer_phone,
+
+            'shipping_address_snapshot' => $addressSnapshot,
+
+            'status' => 'created',
+            'order_from' => 'On-Call',
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Save Sale Items + Deduct Stock
+        |--------------------------------------------------------------------------
+        */
+
+        foreach ($itemsData as $index => $data) {
+
+            $variant = $data['variant'];
+
+            SaleItem::create([
+                'sale_id' => $sale->id,
+                'product_id' => $variant->product->id,
+                'variant_combination_id' => $variant->id,
+                'product_name' => $variant->product->name,
+                'variant_name' => $variant->sku,
+                'sku' => $variant->sku,
+
+                'product_image' => optional($variant->images->first())->image_path
+                    ? asset('storage/' . $variant->images->first()->image_path)
+                    : null,
+
+                'price' => $data['price'],
+                'discount' => $data['discount'],
+                'tax' => $data['tax'],
+                'quantity' => $data['qty'],
+                'total' => $data['total'],
+            ]);
+
+            $variant->decrement('quantity', $data['qty']);
+
+            $barcodeId = $request->items[$index]['barcode_id'] ?? null;
+
+            if ($barcodeId) {
+
+                ProductBarcode::where('id', $barcodeId)
+                    ->where('is_used', false)
+                    ->update(['is_used' => true]);
+
+            } else {
+
+                ProductBarcode::where('variant_id', $variant->id)
+                    ->where('is_used', false)
+                    ->limit($data['qty'])
+                    ->update(['is_used' => true]);
+            }
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order created successfully',
+            // 'data' => [
+            //     'sale_id' => $sale->id,
+            //     'invoice_number' => $sale->invoice_number,
+            //     'subtotal' => $sale->subtotal,
+            //     'product_discount' => $sale->discount_total,
+            //     'billed_discount' => $sale->billed_discount,
+            //     'grand_total' => $sale->grand_total,
+            // ],
+
+                 'data' => [
+                'sale_id'        => $sale->id,
+                'invoice_number' => $sale->invoice_number,
+                'created_at'     => $sale->created_at,
+
+                'subtotal'       => $sale->subtotal,
+
+                'discount_total' => $sale->discount_total,   // product discount
+                'billed_discount'=> $sale->billed_discount,  // bill discount
+                 'delivery_charge' => $sale->delivery_charge,
+
+                'tax_total'      => $sale->tax_total,
+                'grand_total'    => $sale->grand_total,
+                   'shipping_address_snapshot' => $sale->shipping_address_snapshot,
+
+
+                'items' => $sale->items()->get()->map(function ($item) {
+
+                    return [
+                        'product_name' => $item->product_name,
+                        'qty'          => $item->quantity,
+                        'discount'     => $item->discount,
+                         'total_discount'     => $item->discount * $item->quantity,   // product discount
+                        'total'        => $item->total,
+                    ];
+
+    }),
+],
+
+
+
+        ]);
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Something went wrong',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
 
 
