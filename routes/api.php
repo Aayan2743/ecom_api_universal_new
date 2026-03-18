@@ -166,6 +166,10 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     [ShippingController::class,'assignCourier']);
 
     Route::post('/reset-courier/{id}', [ShippingController::class, 'resetCourier']);
+    Route::post('/cancel-courier/{id}', [ShippingController::class, 'cancelCourier']);
+
+
+
     // Coupon Management
     Route::get('/cart/list-coupon', [CouponController::class, 'index']);
     Route::post('/cart/create-coupon', [CouponController::class, 'store']);

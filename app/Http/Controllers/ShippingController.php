@@ -511,6 +511,7 @@ public function resetCourier($id)
         ]);
     }
 
+    $order->tracking_number = null;
     $order->shipping_partner = null;
     $order->awb_no = null;
     $order->courier_number = null;
@@ -522,5 +523,63 @@ public function resetCourier($id)
         'success' => true,
         'message' => 'Courier removed successfully'
     ]);
+}
+
+
+public function cancelCourier(Request $request, ShipmozoClient $shipmozo, $id)
+{
+    try {
+
+        $order = Sale::findOrFail($id);
+
+        // Validate
+        if (!$order->tracking_number) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tracking number missing'
+            ]);
+        }
+
+        // Call Shipmozo API
+        $response = $shipmozo->cancelOrder([
+            "order_id"   => (string) $order->invoice_number,
+            "awb_number" => $order->awb_no,
+        ]);
+
+        // Success check
+        if (($response['result'] ?? "0") == "1") {
+
+            // $order->status = 'cancelled';
+            // $order->save();
+
+
+
+            $order->tracking_number = null;
+            $order->shipping_partner = null;
+            $order->awb_no = null;
+            $order->courier_number = null;
+            $order->status = 'created';
+
+            $order->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order cancelled successfully'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $response['message'] ?? 'Cancel failed'
+        ]);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+
+    }
 }
 }

@@ -74,4 +74,9 @@ class ShipmozoClient
 {
     return $this->request('post', '/assign-courier', $payload);
 }
+
+public function cancelOrder(array $payload)
+{
+    return $this->request('post', '/cancel-order', $payload);
+}
 }

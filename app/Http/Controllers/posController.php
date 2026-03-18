@@ -203,7 +203,7 @@ if ($request->payment_method === 'cash') {
                 'subtotal'                  => $subtotal,
                 'discount_total'            => $itemDiscount,
                   'billed_discount' => $billingDiscount,
-                  'delivery_charge' => $request->deliveryFee ?? 0,
+                  'delivery_charge' => $request->delivery_fee ?? 0,
                 'tax_total'                 => $taxTotal,
                 'grand_total'               => $grandTotal,
 
@@ -381,7 +381,7 @@ if ($request->payment_method === 'cash') {
                 'delivery_charge' => $sale->delivery_charge,  // delivery charge
 
                 'tax_total'      => $sale->tax_total,
-                'grand_total'    => $sale->grand_total,
+                'grand_total'    => $sale->grand_total + $sale->delivery_charge,
                    'shipping_address_snapshot' => $sale->shipping_address_snapshot,
 
                 'items' => $sale->items()->get()->map(function ($item) {
@@ -548,7 +548,8 @@ if ($request->payment_method === 'cash') {
 
             'billed_discount' => $billedDiscount,
 
-             'delivery_charge' => $request->deliveryFee ?? 0,
+
+              'delivery_charge' => $request->delivery_fee,
 
             'tax_total' => $taxTotal,
 
@@ -641,7 +642,7 @@ if ($request->payment_method === 'cash') {
                  'delivery_charge' => $sale->delivery_charge,
 
                 'tax_total'      => $sale->tax_total,
-                'grand_total'    => $sale->grand_total,
+                'grand_total'    => $sale->grand_total + $sale->delivery_charge ,
                    'shipping_address_snapshot' => $sale->shipping_address_snapshot,
 
 
