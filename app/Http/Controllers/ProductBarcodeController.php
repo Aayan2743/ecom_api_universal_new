@@ -447,6 +447,20 @@ PRINT 1,1
         $actual   = $variant->extra_price;
         $discount = $variant->extra_price - $variant->discount;
 
+        $barcodeRecords = $variant->barcodes
+        ->take($variant->quantity);
+
+          // 🔥 Increment print count (optimized)
+    ProductBarcode::whereIn(
+        'id',
+        $barcodeRecords->pluck('id')
+    )->increment('print_count');
+
+    // ✅ Extract barcode values
+
+
+
+
         $barcodes = $variant->barcodes
             ->take($variant->quantity)
             ->pluck('barcode')
@@ -547,6 +561,10 @@ PRINT 1,1
         $barcodeRow = ProductBarcode::where('barcode', $barcode)
             ->with('variant.product', 'variant.values')
             ->firstOrFail();
+
+
+                // 🔥 Increment print count
+    $barcodeRow->increment('print_count');
 
         $variant = $barcodeRow->variant;
 

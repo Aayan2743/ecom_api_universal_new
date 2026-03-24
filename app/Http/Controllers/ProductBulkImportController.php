@@ -174,10 +174,15 @@ public function productVariants(Request $request)
                     ];
                 })->values(),
 
-                'barcodes' => $variant->barcodes
-                 ->take($variant->quantity)
-    ->pluck('barcode')
-
+              'barcodes' => $variant->barcodes
+    ->take($variant->quantity)
+    ->map(function ($b) {
+        return [
+            'id' => $b->id,
+            'barcode' => $b->barcode,
+            'print_count' => $b->print_count ?? 0,
+        ];
+    })
     ->values(),
 
         ];

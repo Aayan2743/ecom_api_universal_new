@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Product;
 use App\Services\WebpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -31,6 +32,9 @@ class CategoryController extends Controller
                     'name'           => $cat->name,
                     'parent_id'      => $cat->parent_id,
                     'parent_name'    => $cat->parent?->name,
+                     'is_active_pos'=>$cat->is_active_pos,
+                     'is_active_ecom'=>$cat->is_active_ecom,
+
                     'full_image_url' => $cat->image
                         ? asset('storage/categories/' . $cat->image)
                         : null,
@@ -74,10 +78,11 @@ class CategoryController extends Controller
 
         $categories = Category::query()
             ->with('parent')
+               ->where('is_active_pos', 1) // ✅ ONLY POS
             ->when($search, function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%");
             })
-            ->orderBy('name', 'asc')
+            ->orderBy('sort_order', 'asc')
             ->get();
 
         return response()->json([
@@ -94,6 +99,41 @@ class CategoryController extends Controller
             }),
         ]);
     }
+
+
+      public function index_all_sort(Request $request)
+    {
+        $search = $request->search;
+
+        $categories = Category::query()
+            ->with('parent')
+            //    ->where('is_active_pos', 1) // ✅ ONLY POS
+            ->when($search, function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        return response()->json([
+            'data' => $categories->map(function ($cat) {
+                return [
+                    'id'          => $cat->id,
+                    'name'        => $cat->name,
+                    'parent_id'   => $cat->parent_id,
+                    'parent_name' => $cat->parent?->name,
+                    'is_active_pos' => $cat->is_active_pos,
+                    'is_active_ecom' => $cat->is_active_ecom,
+                    'image'       => $cat->image
+                        ? asset('storage/categories/' . $cat->image)
+                        : null,
+                ];
+            }),
+        ]);
+    }
+
+
+
+
 
     /* ================= CREATE CATEGORY ================= */
     public function stores(Request $request)
@@ -327,6 +367,17 @@ class CategoryController extends Controller
         ]);
     }
 
+
+    public function updateOrder(Request $request)
+{
+    foreach ($request->order as $item) {
+        Category::where('id', $item['id'])
+            ->update(['sort_order' => $item['position']]);
+    }
+
+    return response()->json(['success' => true]);
+}
+
     /* ================= DELETE CATEGORY ================= */
     /* ================= DELETE CATEGORY ================= */
     public function destroy($id)
@@ -386,5 +437,65 @@ class CategoryController extends Controller
             'message' => 'Sub categories added successfully',
         ]);
     }
+
+
+public function toggle(Request $request)
+{
+    try {
+        // ✅ validate input
+
+
+
+
+          $validator = Validator::make($request->all(), [
+             'id' => 'required|exists:categories,id',
+            'type' => 'required|in:pos,ecom'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $category = Category::findOrFail($request->id);
+
+        // ✅ toggle logic
+        if ($request->type === 'pos') {
+            $newStatus = !$category->is_active_pos;
+
+            $category->is_active_pos = $newStatus;
+
+            \App\Models\Product::where('category_id', $category->id)
+                ->update(['is_active_pos' => $newStatus]);
+        }
+
+        if ($request->type === 'ecom') {
+            $newStatus = !$category->is_active_ecom;
+
+            $category->is_active_ecom = $newStatus;
+
+            \App\Models\Product::where('category_id', $category->id)
+                ->update(['is_active_ecom' => $newStatus]);
+        }
+
+        $category->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category updated successfully',
+            'data' => $category
+        ]);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'error' => 'SERVER_ERROR',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
 
 }

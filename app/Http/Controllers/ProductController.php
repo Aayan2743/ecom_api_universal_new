@@ -581,6 +581,8 @@ public function index_with_percentage(Request $request)
             'variantCombinations.images',
             'variantCombinations.values', // ✅ load variation values
         ])
+
+           ->where('is_active_pos', 1) // ✅ product POS enabled
             ->when($category !== 'all', function ($q) use ($category) {
                 $q->where('category_id', $category);
             })

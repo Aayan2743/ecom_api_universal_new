@@ -179,13 +179,26 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
     // Category Management
     Route::get('/list-category', [CategoryController::class, 'index']);
     Route::get('/list-category-all', [CategoryController::class, 'index_all']);
+    Route::get('/list-category-all-sort', [CategoryController::class, 'index_all_sort']);
     Route::post('/add-category', [CategoryController::class, 'store']);
     Route::post('/update-category/{id}', [CategoryController::class, 'update']);
+    Route::post('/update-category-order', [CategoryController::class, 'updateOrder']);
     Route::delete('/delete-category/{id}', [CategoryController::class, 'destroy']);
     Route::post(
         '/add-sub-category',
         [CategoryController::class, 'addSubCategory']
     );
+
+
+    Route::post('/toggle-category', [CategoryController::class, 'toggle']);
+
+
+    Route::get('/pos/categories', [CategoryController::class, 'posCategories']);
+    Route::get('/ecom/categories', [CategoryController::class, 'ecomCategories']);
+
+Route::get('/pos/products', [ProductController::class, 'posProducts']);
+Route::get('/ecom/products', [ProductController::class, 'ecomProducts']);
+Route::post('/admin-dashboard/toggle-product', [ProductController::class, 'toggle']);
 
     // Brand Management
     Route::get('list-brand', [BrandController::class, 'index']);
