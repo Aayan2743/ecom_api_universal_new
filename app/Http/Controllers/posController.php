@@ -392,6 +392,7 @@ if ($request->payment_method === 'cash') {
                         'discount'     => $item->discount,   // product discount
                         'total_discount'     => $item->discount * $item->quantity,   // product discount
                         'total'        => $item->total,
+                        'hsn'        => $item->sku,
                     ];
 
     }),
@@ -654,6 +655,7 @@ if ($request->payment_method === 'cash') {
                         'discount'     => $item->discount,
                          'total_discount'     => $item->discount * $item->quantity,   // product discount
                         'total'        => $item->total,
+                        'hsn'        => $item->sku,
                     ];
 
     }),

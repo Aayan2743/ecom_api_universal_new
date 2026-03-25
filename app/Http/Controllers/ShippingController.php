@@ -8,9 +8,21 @@ use App\Services\Shipmozo\ShipmozoClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
+use App\Services\Messenger360Service;
+use Illuminate\Support\Facades\Log;
 
 class ShippingController extends Controller
 {
+
+    protected $whatsapp;
+
+    public function __construct(Messenger360Service $whatsapp)
+    {
+        $this->whatsapp = $whatsapp;
+    }
+
+
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -581,5 +593,93 @@ public function cancelCourier(Request $request, ShipmozoClient $shipmozo, $id)
         ]);
 
     }
+}
+
+
+
+public function handle(Request $request)
+{
+    Log::info('Webhook:', $request->all());
+
+    $awb     = $request->awb_number;
+    $status  = $request->current_status;
+
+    $sale = Sale::where('awb_no', $awb)->first();
+
+    if ($sale) {
+
+        $mappedStatus = $this->mapStatus($status);
+
+        // 🚨 Prevent duplicate update + message
+        if ($sale->status === $mappedStatus) {
+            return response()->json(['success' => true]);
+        }
+
+        $sale->update([
+            'status' => $mappedStatus,
+        ]);
+
+        // 🔥 SEND WHATSAPP
+        $this->sendWhatsAppStatus($sale, $status);
+    }
+
+    return response()->json(['success' => true]);
+}
+
+private function mapStatus($status)
+{
+    return match ($status) {
+        'Delivered' => 'completed',
+        'In Transit' => 'in_transit',
+        'Out For Delivery' => 'out_for_delivery',
+        'Pickup Completed' => 'picked',
+        'Cancelled' => 'cancelled',
+        'Undelivered' => 'undelivered',
+        'RTO Delivered' => 'rto_delivered',
+        default => 'pending',
+    };
+}
+
+
+
+
+
+private function sendWhatsAppStatus($sale, $status)
+{
+    $customerPhone = $sale->customer_phone;
+    $adminPhone    = '8919273834'; // ✅ hardcoded admin number
+
+    $message = match ($status) {
+
+        'Pickup Completed' =>
+            "📦 Order #{$sale->invoice_number} shipped",
+
+        'In Transit' =>
+            "🚚 Order #{$sale->invoice_number} is in transit",
+
+        'Out For Delivery' =>
+            "🚚 Order #{$sale->invoice_number} out for delivery",
+
+        'Delivered' =>
+            "✅ Order #{$sale->invoice_number} delivered",
+
+        default => null,
+    };
+
+    if (!$message) return;
+
+    // ✅ CUSTOMER
+    if ($customerPhone) {
+        $this->whatsapp->send($customerPhone, $message);
+    }
+
+    // ✅ ADMIN (TEST NUMBER)
+    $adminMessage = "📢 TEST ADMIN ALERT\n\n"
+        . "Order: #{$sale->invoice_number}\n"
+        . "Status: {$status}\n"
+        . "Customer: {$sale->customer_name}\n"
+        . "Phone: {$sale->customer_phone}";
+
+    $this->whatsapp->send($adminPhone, $adminMessage);
 }
 }

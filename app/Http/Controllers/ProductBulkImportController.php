@@ -149,6 +149,7 @@ public function productVariants(Request $request)
             'product_name' => $variant->product->name,
 
             'sku' => $variant->sku,
+            'is_returnable' => $variant->is_returnable,
 
             'variation_values' => $variant->values
                 ->pluck('value')

@@ -57,6 +57,7 @@ Route::get('/payment/status/{transactionId}',
     [phonepaycontroller::class, 'status']);
 
 Route::post('/webhook', [CartController::class, 'razorpayWebhook']);
+Route::post('/shipmozo/webhook', [ShippingController::class, 'handle']);
 
 Route::get('/test-whatsapp', function (App\Services\Messenger360Service $messenger) {
 
@@ -170,6 +171,10 @@ Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(functio
 
 
 
+
+
+
+
     // Coupon Management
     Route::get('/cart/list-coupon', [CouponController::class, 'index']);
     Route::post('/cart/create-coupon', [CouponController::class, 'store']);
@@ -257,6 +262,7 @@ Route::post('/admin-dashboard/toggle-product', [ProductController::class, 'toggl
     Route::get('/orders', [OrderController::class, 'allorders']);
     Route::get('/orders-details/{id}', [OrderController::class, 'allorders_show']);
     Route::post('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+    Route::post('/order/update-status/{id}', [OrderController::class, 'updateSaleStatus']);
 
     // Attendance
 
@@ -335,6 +341,8 @@ Route::post('/admin-dashboard/toggle-product', [ProductController::class, 'toggl
         '/product-variants',
         [ProductBulkImportController::class, 'productVariants']
     );
+    Route::post('/product/toggle-returnable/{id}', [ProductController::class, 'toggleReturnable']);
+
     Route::post(
         '/bulk-product-variant-images',
         [ProductBulkImportController::class, 'bulkProductVariantImages']

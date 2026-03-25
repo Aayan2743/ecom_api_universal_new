@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Sale;
 use App\Services\Messenger360Service;
 use App\Services\Shiprocket\ShiprocketOrderService;
 use Illuminate\Http\Request;
@@ -432,6 +433,20 @@ class OrderController extends Controller
     ]);
 }
 
+
+
+public function updateSaleStatus(Request $request, $id)
+{
+    $sale = Sale::findOrFail($id);
+
+    $sale->status = $request->status;
+    $sale->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Status updated'
+    ]);
+}
 public function updateStatus(Request $request, $id)
 {
     $order = Order::findOrFail($id);

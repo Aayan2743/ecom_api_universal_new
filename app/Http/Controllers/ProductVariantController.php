@@ -100,6 +100,8 @@ class ProductVariantController extends Controller
             'variant_images'                 => 'nullable|array',
             'variant_images.*'               => 'nullable|array',
             'variant_images.*.*'             => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+
+            'variants.*.is_returnable' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -124,6 +126,7 @@ class ProductVariantController extends Controller
                     'discount'       => $variant['discount'] ?? 0,
                     'quantity'       => $variant['quantity'] ?? 0,
                     'low_quantity'   => $variant['low_quantity'] ?? 0,
+                        'is_returnable'  => (int) ($variant['is_returnable'] ?? 1),
                 ]);
 
                 foreach ($variant['variation_value_ids'] as $valueId) {
@@ -317,6 +320,8 @@ class ProductVariantController extends Controller
             'variants.*.keep_image_ids'      => 'nullable|array',
             'variants.*.keep_image_ids.*'    => 'integer|exists:product_variant_images,id',
 
+            'variants.*.is_returnable' => 'nullable|boolean',
+
             'variants.*.images'              => 'nullable|array',
             'variants.*.images.*'            => 'image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
@@ -346,6 +351,7 @@ class ProductVariantController extends Controller
                         'discount'       => $variant['discount'] ?? 0,
                         'quantity'       => $variant['quantity'] ?? 0,
                         'low_quantity'   => $variant['low_quantity'] ?? 0,
+                         'is_returnable' => (int) ($variant['is_returnable'] ?? 1),
                     ]
                 );
 

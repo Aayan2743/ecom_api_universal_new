@@ -73,4 +73,8 @@ public function barcodes()
 
         return max(0, $price - $discount);
     }
+
+    protected $casts = [
+    'is_returnable' => 'boolean',
+];
 }

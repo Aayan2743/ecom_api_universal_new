@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductVariantCombination;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -19,19 +20,7 @@ class ProductController extends Controller
         $search  = $request->search;
         $perPage = $request->perPage ?? 10;
 
-        // $products = Product::query()
-        //     ->whereNull('deleted_at') // explicit (optional but clean)
-        //     ->with([
-        //         'category:id,name,parent_id',
-        //         'category.parent:id,name',
-        //         'brand:id,name',
-        //         'images:id,product_id,image_path,is_primary',
-        //         'sections:id,name,slug',
-        //     ])
-        //     ->withMin('variantCombinations as min_price', 'extra_price')
-        //     ->withMin('variantCombinations as min_discount', 'discount')
-        //     ->orderBy('id', 'desc')
-        //     ->paginate($perPage);
+
 
         $products = Product::query()
             ->whereNull('deleted_at')
@@ -95,6 +84,21 @@ class ProductController extends Controller
             ],
         ]);
     }
+
+
+
+    public function toggleReturnable(Request $request, $id)
+{
+    $variant = ProductVariantCombination::findOrFail($id);
+
+    $variant->is_returnable = (int) $request->is_returnable;
+    $variant->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Updated successfully'
+    ]);
+}
 
 
 public function index_with_percentage(Request $request)
@@ -190,7 +194,7 @@ public function index_with_percentage(Request $request)
             'images:id,product_id,image_path,is_primary',
             'videos:id,product_id,video_url',
 
-            'variantCombinations:id,product_id,sku,purchase_price,extra_price,discount,quantity,low_quantity',
+            'variantCombinations:id,product_id,sku,purchase_price,extra_price,discount,quantity,low_quantity,is_returnable',
 
             // 🔥 REQUIRED FOR EDIT FLOW
 
@@ -245,18 +249,9 @@ public function index_with_percentage(Request $request)
                     'is_primary' => $img->is_primary,
                 ]),
 
-                /* Variations */
-                // 'variantCombinations' => $product->variantCombinations->map(fn($v) => [
-                //     'id'             => $v->id,
-                //     'sku'            => $v->sku,
-                //     'purchase_price' => $v->purchase_price,
-                //     'extra_price'    => $v->extra_price,
-                //     'discount'       => $v->discount,
-                //     'quantity'       => $v->quantity,
-                //     'low_quantity'   => $v->low_quantity,
-                // ]),
 
                 'variantCombinations' => $product->variantCombinations->map(function ($combo) {
+
                     return [
                         'id'                 => $combo->id,
                         'sku'                => $combo->sku,
@@ -265,6 +260,7 @@ public function index_with_percentage(Request $request)
                         'discount'           => $combo->discount,
                         'quantity'           => $combo->quantity,
                         'low_quantity'       => $combo->low_quantity,
+                        'is_returnable'       => $combo->is_returnable,
 
                         // 🔥 THIS FIXES EDIT PREFILL
                         'combination_values' => $combo->values->map(fn($v) => [
