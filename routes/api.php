@@ -294,7 +294,9 @@ Route::post('/admin-dashboard/toggle-product', [ProductController::class, 'toggl
     // 🟢 Step 2: Verify OTP & Create Final Order
     Route::post('/verify-order-otp', [PosController::class, 'verifyOrderOtp']);
     Route::post('/pos/create-order', [posController::class, 'store']);
-    Route::post('/pos/create-order-oncall', [posController::class, 'storeOncall']);
+    Route::post('/pos/create-order-manually-oncall', [posController::class, 'store_manually_oncall']);
+    Route::post('/pos/create-order-oncall-orders', [posController::class, 'store_oncall']);
+    Route::post('/pos/create-order-walking', [posController::class, 'storeOncall']);
 
     // add customer
 
@@ -305,6 +307,7 @@ Route::post('/admin-dashboard/toggle-product', [ProductController::class, 'toggl
 
     // pos order details fetch
     Route::get('/calling/orders', [posController::class, 'manualOrders']);
+    Route::get('/calling/employees/orders', [posController::class, 'manualOrders_logined_user']);
     Route::get('/calling/order/{id}', [posController::class, 'manualOrderDetails']);
     // Route::post('/send-courier/{id}', [posController::class, 'sendToCourier']);
     Route::get('/customer/{id}/orders', [posController::class, 'customerOrders']);

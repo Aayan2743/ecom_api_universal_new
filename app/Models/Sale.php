@@ -8,6 +8,7 @@ class Sale extends Model
     protected $fillable = [
         'invoice_number',
         'customer_id',
+        'user_id',
         'subtotal',
         'discount_total',
         'tax_total',
@@ -52,6 +53,12 @@ class Sale extends Model
     public function customer()
     {
         return $this->belongsTo(User::class, 'customer_id');
+    }
+
+
+        public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 }
