@@ -254,7 +254,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function admin_login(Request $request)
+    public function admin_login_old(Request $request)
     {
 
         $validator = Validator::make($request->all(), [
@@ -298,6 +298,18 @@ class AuthController extends Controller
             ], 401);
         }
 
+          // ✅ LOAD ROLES + PERMISSIONS
+            $roles = $user->getRoleNames(); // ["Admin"]
+            // $permissions = $user->getAllPermissions()->pluck('name'); // ["view_products"]
+
+
+            $permissions = $user->getAllPermissions()->pluck('name')->toArray();
+
+            // 🔥 if admin → override
+            if ($user->hasRole('admin')) {
+                $permissions = ['*'];
+            }
+
         // JWT Token
         $token = JWTAuth::fromUser($user);
 
@@ -306,6 +318,78 @@ class AuthController extends Controller
             'token'      => $token,
             'token_type' => 'Bearer',
             'user'       => $user,
+            'roles'      => $roles,
+            'permissions' => $permissions,
+        ]);
+    }
+
+
+      public function admin_login(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string', // email OR phone
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors()->first(),
+            ], 422);
+        }
+
+        $loginField = filter_var($request->username, FILTER_VALIDATE_EMAIL)
+            ? 'email'
+            : 'phone';
+
+        $user = User::where($loginField, $request->username)->first();
+
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        // ✅ Allow admin and employee
+        // if (! in_array($user->role, ['admin', 'employee'])) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Access denied',
+        //     ], 403);
+        // }
+
+        // Password check
+        if (! Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials',
+            ], 401);
+        }
+
+          // ✅ LOAD ROLES + PERMISSIONS
+            $roles = $user->getRoleNames(); // ["Admin"]
+            // $permissions = $user->getAllPermissions()->pluck('name'); // ["view_products"]
+
+
+            $permissions = $user->getAllPermissions()->pluck('name')->toArray();
+
+            // 🔥 if admin → override
+            if ($user->hasRole('admin')) {
+                $permissions = ['*'];
+            }
+
+        // JWT Token
+        $token = JWTAuth::fromUser($user);
+
+        return response()->json([
+            'success'    => true,
+            'token'      => $token,
+            'token_type' => 'Bearer',
+            'user'       => $user,
+            'roles'      => $roles,
+            'permissions' => $permissions,
         ]);
     }
 

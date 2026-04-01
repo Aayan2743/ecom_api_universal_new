@@ -7,6 +7,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+use Spatie\Permission\Traits\HasRoles;
+
+
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -17,6 +20,8 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var list<string>
      */
+
+     use HasRoles;
     protected $guarded = [
 
     ];

@@ -38,6 +38,10 @@ use App\Http\Controllers\WhatsappSettingController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
+
+use App\Http\Controllers\RoleController;
+
+
 // this is use for whatsapp payment link creation and webhook handling
 Route::get('/payment-success', [WhatsAppController::class, 'checkPayment']);
 
@@ -112,6 +116,25 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(function () {
+
+      // ================= Roles & Permissions =================
+    Route::post('/create-role', [RoleController::class, 'createRole']);
+    Route::get('/roles', [RoleController::class, 'getRoles']);
+    Route::get('/role-permissions', [RoleController::class, 'getPermissions']); // ✅ ADD THIS
+    Route::get('/my-permissions', [RoleController::class, 'myPermissions']); // ✅ ADD THIS
+    Route::get('/role-permissions/{role}', [RoleController::class, 'getRolePermissions']);
+    Route::delete('/delete-role/{id}', [RoleController::class, 'deleteRole']);
+    Route::post('/create-permission', [RoleController::class, 'createPermission']);
+    Route::delete('/delete-permission/{id}', [RoleController::class, 'deletePermission']);
+    Route::post('/assign-permission', [RoleController::class, 'assignPermissionToRole']);
+    Route::post('/assign-role', [RoleController::class, 'assignRoleToUser']);
+    Route::get('/check', [RoleController::class, 'checkPermission']);
+       Route::get('/users', [RoleController::class, 'getUsers']);
+       Route::post('/remove-role', [RoleController::class, 'removeRoleFromUser']);
+
+
+
+
 
     // ================= AUTH =================
     Route::get('/user-details', [AuthController::class, 'userDetails']);
