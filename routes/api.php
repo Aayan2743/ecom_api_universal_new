@@ -40,7 +40,8 @@ use Illuminate\Support\Facades\Route;
 
 
 use App\Http\Controllers\RoleController;
-
+use App\Http\Controllers\SuperAdmin\ModuleController;
+use App\Http\Controllers\SuperAdmin\SuperAdminRoleController;
 
 // this is use for whatsapp payment link creation and webhook handling
 Route::get('/payment-success', [WhatsAppController::class, 'checkPayment']);
@@ -86,13 +87,15 @@ Route::prefix('auth')->group(function () {
     // Route::get('sample', [AuthController::class, 'sample']);
 
     // Route::get('/stats', [DashboardController::class, 'stats']);
+    Route::get('/me', [AuthController::class, 'me']);
 
     // Login with OTP / Register
     Route::post('/send-otp', [OtpAuthController::class, 'sendOtp']);
     Route::post('/verify-login-otp', [OtpAuthController::class, 'verifyOtp']);
 
     Route::post('super-admin-login', [AuthController::class, 'super_admin_login']);
-    Route::post('admin-register', [AuthController::class, 'admin_register']);
+
+    Route::post('super-admin-register', [AuthController::class, 'super_admin_register']);
     Route::post('admin-login', [AuthController::class, 'admin_login']);
     Route::post('user-register', [AuthController::class, 'register']);
     Route::post('user-login', [AuthController::class, 'login']);
@@ -112,6 +115,39 @@ Route::prefix('auth')->group(function () {
     );
 
     Route::get('/message', [OrderController::class, 'sendWhatsappTest']);
+
+});
+
+
+Route::prefix('super-admin-dashboard')->middleware(['api', 'jwt.auth'])->group(function () {
+
+        Route::post('admin-register', [AuthController::class, 'admin_register']);
+        Route::get('admin-list', [AuthController::class, 'list_admin_register']);
+        Route::post('/admin-update/{id}', [AuthController::class, 'updateAdmin']);
+        Route::post('/admin-status/{id}', [AuthController::class, 'toggleStatus']);
+        Route::delete('/admin-delete/{id}', [AuthController::class, 'deleteAdmin']);
+
+
+        // Modules Management
+
+        Route::get('/modules', [ModuleController::class, 'index']);
+        Route::post('/modules', [ModuleController::class, 'store']);
+        Route::post('/modules/{id}', [ModuleController::class, 'update']);
+        Route::delete('/modules/{id}', [ModuleController::class, 'destroy']);
+        Route::post('/modules-toggle/{id}', [ModuleController::class, 'toggle']);
+
+        Route::post('/add-permission', [ModuleController::class, 'addPermission']);
+        Route::get('/modules-permissions', [ModuleController::class, 'modulesWithPermissions']);
+
+        // roles and permissions routes are in RoleController
+
+           Route::get('/roles', [SuperAdminRoleController::class, 'index']);
+           Route::post('/create-role', [SuperAdminRoleController::class, 'store']);
+
+           Route::get('/role-permissions/{role}', [SuperAdminRoleController::class, 'getRolePermissions']);
+           Route::post('/assign-permissions', [SuperAdminRoleController::class, 'assignPermissions']);
+
+           Route::delete('/role/{id}', [SuperAdminRoleController::class, 'destroy']);
 
 });
 

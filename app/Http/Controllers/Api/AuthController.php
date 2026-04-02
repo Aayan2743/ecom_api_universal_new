@@ -29,6 +29,124 @@ class AuthController extends Controller
         ]);
     }
 
+   public function list_admin_register(Request $request)
+{
+    $query = User::where('role', 'admin');
+
+    // 🔍 SEARCH (name, email, phone)
+    if ($request->search) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%$search%")
+              ->orWhere('email', 'like', "%$search%")
+              ->orWhere('phone', 'like', "%$search%");
+        });
+    }
+
+    // 🔥 PAGINATION
+    $perPage = $request->per_page ?? 5;
+
+    $admins = $query->orderBy('id', 'desc')->paginate($perPage);
+
+    return response()->json([
+        'success' => true,
+        'data'    => $admins->items(),
+        'meta'    => [
+            'current_page' => $admins->currentPage(),
+            'last_page'    => $admins->lastPage(),
+            'per_page'     => $admins->perPage(),
+            'total'        => $admins->total(),
+        ]
+    ]);
+}
+
+public function updateAdmin(Request $request, $id)
+{
+    $admin = User::find($id);
+
+    if (!$admin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Admin not found'
+        ], 404);
+    }
+
+    // ✅ VALIDATION
+    $validator = Validator::make($request->all(), [
+        'name'     => 'required|string|max:255',
+        'email'    => 'required|email|unique:users,email,' . $id,
+        'phone'    => 'required|digits:10|unique:users,phone,' . $id,
+        'password' => 'nullable|min:6',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => $validator->errors()->first(),
+            'errors'  => $validator->errors(),
+        ], 422);
+    }
+
+    // ✅ UPDATE DATA
+    $admin->name = $request->name;
+    $admin->email = $request->email;
+    $admin->phone = $request->phone;
+
+    // 🔐 update password only if provided
+    if ($request->password) {
+        $admin->password = Hash::make($request->password);
+    }
+
+    $admin->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Admin updated successfully'
+    ]);
+}
+
+public function toggleStatus(Request $request, $id)
+{
+    $admin = User::find($id);
+
+    if (!$admin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Admin not found'
+        ], 404);
+    }
+
+    $admin->status = $request->status; // active / inactive
+    $admin->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Status updated successfully'
+    ]);
+}
+
+public function deleteAdmin($id)
+{
+    $admin = User::find($id);
+
+    if (!$admin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Admin not found'
+        ], 404);
+    }
+
+    $admin->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Admin deleted successfully'
+    ]);
+}
+
+
+
     public function user_details(Request $request)
     {
         $perPage = $request->get('per_page', 10); // default 10
@@ -193,16 +311,27 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'token'   => $token,
-            'user'    => $user,
+             'user'    => [
+                'id'     => $user->id,
+                'name'   => $user->name,
+                'email'  => $user->email,
+                'phone'  => $user->phone,
+                'status' => $user->status, // ✅ here
+                'role'   => $user->role,
+            ],
         ]);
     }
 
-    public function admin_login_11(Request $request)
-    {
 
+
+
+     public function super_admin_register(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'username' => 'required|string', // email OR phone
-            'password' => 'required|string',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'phone'    => 'required|digits:10|unique:users,phone',
         ]);
 
         if ($validator->fails()) {
@@ -212,47 +341,24 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $loginField = filter_var($request->username, FILTER_VALIDATE_EMAIL)
-            ? 'email'
-            : 'phone';
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'phone'    => $request->phone,
+            'role'     => 'superadmin',
+        ]);
 
-        // Fetch user manually
-        $user = User::where($loginField, $request->username)->first();
-
-        // User not found
-        if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not found',
-            ], 404);
-        }
-
-        if ($user->role != 'admin') { // 2 = admin
-            return response()->json([
-                'success' => false,
-                'message' => 'Access denied. Admins only.',
-            ], 403);
-        }
-
-        // Password check
-        if (! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid credentials',
-            ], 401);
-        }
-
-        // Generate JWT token manually
         $token = JWTAuth::fromUser($user);
 
         return response()->json([
-            'success'    => true,
-            'token'      => $token,
-            'token_type' => 'Bearer',
-            'user'       => $user,
-
+            'success' => true,
+            'token'   => $token,
+            'user'    => $user,
         ]);
     }
+
+
 
     public function admin_login_old(Request $request)
     {
@@ -324,6 +430,13 @@ class AuthController extends Controller
     }
 
 
+    public function me(Request $request)
+    {
+        return response()->json([
+            'user' => $request->user()
+        ]);
+    }
+
       public function admin_login(Request $request)
     {
 
@@ -352,6 +465,14 @@ class AuthController extends Controller
             ], 404);
         }
 
+        // 🔥 STATUS CHECK (ADD THIS)
+        if (strtolower(trim($user->status)) !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is inactive. Please contact admin.',
+            ], 403);
+        }
+
         // ✅ Allow admin and employee
         // if (! in_array($user->role, ['admin', 'employee'])) {
         //     return response()->json([
@@ -376,9 +497,9 @@ class AuthController extends Controller
             $permissions = $user->getAllPermissions()->pluck('name')->toArray();
 
             // 🔥 if admin → override
-            if ($user->hasRole('admin')) {
-                $permissions = ['*'];
-            }
+            // if ($user->hasRole('admin')) {
+            //     $permissions = ['*'];
+            // }
 
         // JWT Token
         $token = JWTAuth::fromUser($user);
@@ -426,7 +547,7 @@ class AuthController extends Controller
         if ($user->role != 'superadmin') { // 2 = admin
             return response()->json([
                 'success' => false,
-                'message' => 'Access denied. Admins only.',
+                'message' => 'Access denied. Super Admins only.',
             ], 403);
         }
 
