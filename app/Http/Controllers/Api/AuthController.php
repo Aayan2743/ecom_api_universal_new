@@ -31,7 +31,9 @@ class AuthController extends Controller
 
    public function list_admin_register(Request $request)
 {
-    $query = User::where('role', 'admin');
+    // $query = User::where('role', 'admin');
+
+    $query = User::whereIn('role', ['admin', 'superadmin']);
 
     // 🔍 SEARCH (name, email, phone)
     if ($request->search) {
@@ -45,13 +47,26 @@ class AuthController extends Controller
     }
 
     // 🔥 PAGINATION
-    $perPage = $request->per_page ?? 5;
+    // $perPage = $request->per_page ?? 15;
+    $perPage =  15;
 
     $admins = $query->orderBy('id', 'desc')->paginate($perPage);
 
     return response()->json([
         'success' => true,
-        'data'    => $admins->items(),
+        // 'data'    => $admins->items(),
+        'data' => collect($admins->items())->map(function ($user) {
+    return [
+        'id'     => $user->id,
+        'name'   => $user->name,
+        'email'  => $user->email,
+        'phone'  => $user->phone,
+        'status' => $user->status,
+
+        // 🔥 ADD ROLES
+        'roles'  => $user->getRoleNames(), // ["admin", "editor"]
+    ];
+}),
         'meta'    => [
             'current_page' => $admins->currentPage(),
             'last_page'    => $admins->lastPage(),
@@ -489,12 +504,26 @@ public function deleteAdmin($id)
             ], 401);
         }
 
+
+
+        $isSuperAdmin = $user->hasRole('superadmin');
+
+        if ($isSuperAdmin) {
+                $permissions = ['*']; // full access
+            } else {
+                $permissions = $user->getAllPermissions()->pluck('name')->toArray();
+            }
+
+        // dd($isSuperAdmin);
+
           // ✅ LOAD ROLES + PERMISSIONS
             $roles = $user->getRoleNames(); // ["Admin"]
             // $permissions = $user->getAllPermissions()->pluck('name'); // ["view_products"]
 
 
-            $permissions = $user->getAllPermissions()->pluck('name')->toArray();
+
+
+            // $permissions = $user->getAllPermissions()->pluck('name')->toArray();
 
             // 🔥 if admin → override
             // if ($user->hasRole('admin')) {
@@ -511,6 +540,7 @@ public function deleteAdmin($id)
             'user'       => $user,
             'roles'      => $roles,
             'permissions' => $permissions,
+            'is_super_admin' => $isSuperAdmin,
         ]);
     }
 

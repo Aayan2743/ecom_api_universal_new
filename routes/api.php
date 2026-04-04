@@ -149,6 +149,8 @@ Route::prefix('super-admin-dashboard')->middleware(['api', 'jwt.auth'])->group(f
 
            Route::delete('/role/{id}', [SuperAdminRoleController::class, 'destroy']);
 
+             Route::post('/assign-role-to-user', [RoleController::class, 'assignRoleToUser']);
+
 });
 
 Route::prefix('admin-dashboard')->middleware(['api', 'jwt.auth'])->group(function () {
@@ -394,6 +396,8 @@ Route::post('/admin-dashboard/toggle-product', [ProductController::class, 'toggl
     Route::get('/sections', [SectionController::class, 'index']);
     Route::post('/products/{id}/sections', [SectionController::class, 'assignSections']);
     Route::post('/upate-sections/{id}', [SectionController::class, 'update']);
+    Route::post('/sections/sort', [SectionController::class, 'sort']);
+    Route::delete('/sections/{id}', [SectionController::class, 'destroy']);
 
     // bulk upload excel sheet
     Route::post('/products-bulk-import', [ProductBulkImportController::class, 'bulkUpload']);

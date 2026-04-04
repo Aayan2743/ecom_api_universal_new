@@ -9,6 +9,7 @@ class Section extends Model
         'name',
         'slug',
         'status',
+        'position',
     ];
 
     public function productss()

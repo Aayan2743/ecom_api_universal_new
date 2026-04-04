@@ -24,10 +24,14 @@ class SectionController extends Controller
             ], 422);
         }
 
+         // Get last position
+         $lastPosition = Section::max('position');
+
         $section = Section::create([
             'name'   => $request->name,
             'slug'   => Str::slug($request->name),
             'status' => 1,
+            'position' => $lastPosition ? $lastPosition + 1 : 1, // 👈 important
         ]);
 
         return response()->json([
@@ -36,11 +40,42 @@ class SectionController extends Controller
         ]);
     }
 
+    public function sort(Request $request)
+{
+    foreach ($request->order as $item) {
+        Section::where('id', $item['id'])
+            ->update(['position' => $item['position']]);
+    }
+
+    return response()->json(['success' => true]);
+}
+
+
+public function destroy($id)
+{
+    $section = Section::find($id);
+
+    if (! $section) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Section not found',
+        ], 404);
+    }
+
+    $section->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Section deleted successfully',
+    ]);
+}
+
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'name'   => 'required|string|max:255|unique:sections,name,' . $id,
             'status' => 'nullable|in:0,1',
+             'position' => 'nullable|integer|min:1', // 👈 add this
 
         ]);
 
@@ -64,6 +99,7 @@ class SectionController extends Controller
             'name'   => $request->name,
             'slug'   => Str::slug($request->name),
             'status' => $request->status ?? $section->status,
+            'position' => $request->position ?? $section->position, // 👈 add this
 
         ]);
 
@@ -78,7 +114,7 @@ class SectionController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data'    => Section::latest()->get(),
+            'data'    => Section::orderBy('position')->get(),
         ]);
     }
 
