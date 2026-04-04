@@ -570,12 +570,18 @@ public function index_with_percentage(Request $request)
 
     public function posProducts(Request $request)
     {
+
+    // dd($request->all());
+
+
+
         $category = $request->category;
 
         $products = Product::with([
             'images',
             'variantCombinations.images',
             'variantCombinations.values', // ✅ load variation values
+             'taxAffinity',
         ])
 
            ->where('is_active_pos', 1) // ✅ product POS enabled
@@ -596,6 +602,14 @@ public function index_with_percentage(Request $request)
                         ? asset('storage/' . $p->images->first()->image_path)
                         : null,
 
+
+                       'tax' => $p->taxAffinity ? [
+    'gst_enabled'     => $p->taxAffinity->gst_enabled,
+    'gst_type'        => $p->taxAffinity->gst_type,
+    'gst_percent'     => $p->taxAffinity->gst_percent,
+
+] : null,
+
                     'variants'  => $p->variantCombinations->map(function ($v) {
 
                         // ✅ build variation name (500 g / 1 kg etc)
@@ -611,6 +625,8 @@ public function index_with_percentage(Request $request)
                             'MRP'  => $v->extra_price,
                             'discount'  => $v->discount,
                             'stock'  => $v->quantity,
+
+
 
                             'images' => $v->images->map(function ($img) {
                                 return [
@@ -701,45 +717,55 @@ public function index_with_percentage(Request $request)
             'variants',
             'variants.images',
             'variants.values',
+              'taxAffinity',
         ])
             ->select('id', 'name')
             ->where('name', 'like', "%{$search}%")
             ->limit(20)
             ->get()
-            ->map(function ($product) {
+           ->map(function ($product) {
 
-                return [
-                    'id'        => $product->id,
-                    'name'      => $product->name,
+    return [
+        'id'        => $product->id,
+        'name'      => $product->name,
 
-                    // first variant image as product image
-                    'image_url' => optional($product->variants->first()->images->first())->image_path
-                        ? asset('storage/products/variant-images/' . $product->variants->first()->images->first()->image_path)
-                        : null,
+        // ✅ ADD TAX HERE
+        'tax' => [
+            'gst_enabled' => (bool) optional($product->taxAffinity)->gst_enabled,
+            'gst_type'    => optional($product->taxAffinity)->gst_type,
+            'gst_percent' => optional($product->taxAffinity)->gst_percent,
+        ],
 
-                    'variants'  => $product->variants->map(function ($variant) {
+        // image
+        'image_url' => optional($product->variants->first()->images->first())->image_path
+            ? asset('storage/products/variant-images/' . $product->variants->first()->images->first()->image_path)
+            : null,
 
-                        return [
-                            'id'     => $variant->id,
+        'variants'  => $product->variants->map(function ($variant) {
 
-                            // variant name from variation values
-                            'name'   => $variant->values->pluck('value')->implode(' / '),
+            return [
+                'id'     => $variant->id,
 
-                            'price'  => $variant->amount,
+                'name'   => $variant->values->pluck('value')->implode(' / '),
 
-                            'stock'  => $variant->quantity ?? 0,
+                'price'  => $variant->amount,
 
-                            'images' => $variant->images->map(function ($img) {
-                                return [
-                                    'id'        => $img->id,
-                                    'image_url' => asset('storage/products/variant-images/' . $img->image_path),
-                                ];
-                            }),
-                        ];
-                    }),
-                ];
-            });
+                'MRP'    => $variant->amount, // optional (if needed)
 
+                'discount' => 0, // optional
+
+                'stock'  => $variant->quantity ?? 0,
+
+                'images' => $variant->images->map(function ($img) {
+                    return [
+                        'id'        => $img->id,
+                        'image_url' => asset('storage/products/variant-images/' . $img->image_path),
+                    ];
+                }),
+            ];
+        }),
+    ];
+});
         return response()->json([
             'data' => $products,
         ]);

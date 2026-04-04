@@ -538,6 +538,14 @@ PRINT 1,1
         return response()->json([
             "id"        => $product->id,
             "name"      => $product->name,
+
+             "tax" => [
+                    "gst_enabled" => (bool) optional($product->taxAffinity)->gst_enabled,
+                    "gst_type"    => optional($product->taxAffinity)->gst_type,
+                    "gst_percent" => optional($product->taxAffinity)->gst_percent,
+                ],
+
+
             "image_url" => $product->image_url ?? null,
             "variants"  => [
                 [

@@ -62,10 +62,11 @@ class RoleController extends Controller
     public function deleteRole($id)
     {
         $role = Role::findOrFail($id);
-        $role->delete();
+        $res=$role->delete();
 
         return response()->json([
-            'message' => 'Role deleted successfully'
+            'message' => 'Role deleted successfully',
+            'status' => $res
         ]);
     }
 
@@ -141,23 +142,19 @@ public function assignPermissionToRole(Request $request)
         }
     }
 
-    public function getRoles(Request $request)
+public function getRoles(Request $request)
 {
-    // get search value
     $search = $request->search;
 
-    // query roles
-    $query = Role::query();
+    $query = Role::query()
+        ->where('name', '!=', 'superadmin'); // ✅ exclude superadmin
 
-    // apply search (optional)
     if ($search) {
         $query->where('name', 'like', "%{$search}%");
     }
 
-    // get data
     $roles = $query->latest()->get();
 
-    // return response
     return response()->json($roles);
 }
 
@@ -176,15 +173,25 @@ public function myPermissions()
 
 
 
+// public function getUsers(Request $request)
+// {
+//     $users = User::with('roles:id,name') // 🔥 IMPORTANT
+//         ->select('id', 'name', 'email')
+//         ->get();
+
+//     return response()->json($users);
+// }
+
+
 public function getUsers(Request $request)
 {
-    $users = User::with('roles:id,name') // 🔥 IMPORTANT
-        ->select('id', 'name', 'email')
+    $users = User::with('roles:id,name') // optional if still needed
+        ->where('role', 'employee') // ✅ filter here
+        ->select('id', 'name', 'email', 'role')
         ->get();
 
     return response()->json($users);
 }
-
 
 public function removeRoleFromUser(Request $request)
 {
