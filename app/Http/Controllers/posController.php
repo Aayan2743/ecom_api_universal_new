@@ -502,37 +502,6 @@ class posController extends Controller
                 'order_from'                => 'walk-in',
             ]);
 
-            // 🧾 Save Sale Items + Deduct Stock
-            // foreach ($itemsData as $data) {
-
-            //     $variant = $data['variant'];
-
-            //     SaleItem::create([
-            //         'sale_id'                => $sale->id,
-
-            //         'product_id'             => $variant->product->id,
-            //         'variant_combination_id' => $variant->id,
-
-            //         'product_name'           => $variant->product->name,
-            //         'variant_name'           => $variant->sku,
-            //         'sku'                    => $variant->sku,
-
-            //         'product_image'          => optional($variant->images->first())->image_path
-            //             ? asset('storage/' . $variant->images->first()->image_path)
-            //             : null,
-
-            //         'price'                  => $data['price'],
-            //         'discount'               => $data['discount'],
-            //         'tax'                    => $data['tax'],
-
-            //         'quantity'               => $data['qty'],
-            //         'total'                  => $data['total'],
-            //     ]);
-
-            //     // 🔥 Deduct Stock
-            //     $variant->decrement('quantity', $data['qty']);
-            // }
-
             foreach ($itemsData as $index => $data) {
 
                 $variant = $data['variant'];
@@ -597,16 +566,6 @@ class posController extends Controller
 
             DB::commit();
 
-            // return response()->json([
-            //     'success' => true,
-            //     'message' => 'Order created successfully',
-            //     'data'    => [
-            //         'sale_id'        => $sale->id,
-            //         'invoice_number' => $sale->invoice_number,
-            //         'grand_total'    => $sale->grand_total,
-            //     ],
-            // ]);
-
             try {
 
                 if ($request->customer_phone) {
@@ -614,26 +573,52 @@ class posController extends Controller
                     // $phone = '91' . ltrim($request->customer_phone, '0');
                     $phone = $request->customer_phone;
 
-                    $message  = "🧾 *Order Invoice*\n";
-                    $message .= "Invoice: {$sale->invoice_number}\n\n";
+                    $message  = "🧾 *ORDER INVOICE*\n";
+                    $message .= "━━━━━━━━━━━━━━━\n";
+                    $message .= "📄 Invoice: *{$sale->invoice_number}*\n";
+                    $message .= "👤 Customer: {$sale->customer_name}\n";
+                    $message .= "📞 {$sale->customer_phone}\n";
+                    $message .= "━━━━━━━━━━━━━━━\n\n";
 
-                    $message .= "📦 *Items*\n";
+                    $message .= "📦 *ITEM DETAILS*\n\n";
 
                     foreach ($sale->items as $item) {
 
-                        $message .= "• {$item->product_name}\n";
-                        $message .= "Qty: {$item->quantity}\n";
-                        $message .= "Price: ₹{$item->price}\n";
-                        $message .= "Total: ₹{$item->total}\n\n";
+                        $message .= "🔸 *{$item->product_name}*\n";
+                        $message .= "   Qty: {$item->quantity}\n";
+                        $message .= "   Price: ₹{$item->price}\n";
 
+                        if ($item->discount > 0) {
+                            $message .= "   Discount: ₹{$item->discount}\n";
+                        }
+
+                        $message .= "   Total: ₹{$item->total}\n\n";
                     }
 
-                    $message .= "Subtotal: ₹{$sale->subtotal}\n";
-                    $message .= "Tax: ₹{$sale->tax_total}\n";
-                    $message .= "*Grand Total: ₹{$sale->grand_total}*\n\n";
+                    $message .= "━━━━━━━━━━━━━━━\n";
+                    $message .= "💰 *BILL SUMMARY*\n\n";
 
-                    $message .= "🙏 *Thank you for visiting Sri Devi Herbals*\n";
-                    $message .= "🌿 Welcome again!";
+                    $message .= "Subtotal: ₹{$sale->subtotal}\n";
+
+                    if ($sale->discount_total > 0) {
+                        $message .= "Discount: -₹{$sale->discount_total}\n";
+                    }
+
+                    if ($sale->billed_discount > 0) {
+                        $message .= "Extra Discount: -₹{$sale->billed_discount}\n";
+                    }
+
+                    if ($sale->tax_total > 0) {
+                        $message .= "GST: ₹{$sale->tax_total}\n";
+                    }
+
+                    $message .= "━━━━━━━━━━━━━━━\n";
+                    $message .= "🧾 *TOTAL PAYABLE: ₹{$sale->paid_amount}*\n";
+                    $message .= "━━━━━━━━━━━━━━━\n\n";
+
+                    $message .= "🙏 *Thank you for visiting*\n";
+                    $message .= "🌿 *Sri Devi Herbals*\n";
+                    $message .= "✨ We hope to see you again!";
 
                     $this->messenger->send($phone, $message);
                 }
@@ -1196,17 +1181,72 @@ class posController extends Controller
 
             DB::commit();
 
+            try {
+
+                if ($request->customer_phone) {
+
+                    // $phone = '91' . ltrim($request->customer_phone, '0');
+                    $phone = $request->customer_phone;
+
+                    $message  = "🧾 *ORDER INVOICE*\n";
+                    $message .= "━━━━━━━━━━━━━━━\n";
+                    $message .= "📄 Invoice: *{$sale->invoice_number}*\n";
+                    $message .= "👤 Customer: {$sale->customer_name}\n";
+                    $message .= "📞 {$sale->customer_phone}\n";
+                    $message .= "━━━━━━━━━━━━━━━\n\n";
+
+                    $message .= "📦 *ITEM DETAILS*\n\n";
+
+                    foreach ($sale->items as $item) {
+
+                        $message .= "🔸 *{$item->product_name}*\n";
+                        $message .= "   Qty: {$item->quantity}\n";
+                        $message .= "   Price: ₹{$item->price}\n";
+
+                        if ($item->discount > 0) {
+                            $message .= "   Discount: ₹{$item->discount}\n";
+                        }
+
+                        $message .= "   Total: ₹{$item->total}\n\n";
+                    }
+
+                    $message .= "━━━━━━━━━━━━━━━\n";
+                    $message .= "💰 *BILL SUMMARY*\n\n";
+
+                    $message .= "Subtotal: ₹{$sale->subtotal}\n";
+
+                    if ($sale->discount_total > 0) {
+                        $message .= "Discount: -₹{$sale->discount_total}\n";
+                    }
+
+                    if ($sale->billed_discount > 0) {
+                        $message .= "On Bill Discount: -₹{$sale->billed_discount}\n";
+                    }
+
+                    if ($sale->tax_total > 0) {
+                        $message .= "GST: ₹{$sale->tax_total}\n";
+                    }
+
+                    $message .= "━━━━━━━━━━━━━━━\n";
+                    $message .= "🧾 *TOTAL PAYABLE: ₹{$sale->paid_amount}*\n";
+                    $message .= "━━━━━━━━━━━━━━━\n\n";
+
+                    $message .= "🙏 *Thank you for visiting*\n";
+                    $message .= "🌿 *Sri Devi Herbals*\n";
+                    $message .= "✨ We hope to see you again!";
+
+                    $this->messenger->send($phone, $message);
+                }
+
+            } catch (\Exception $e) {
+
+                Log::error("WhatsApp send failed: " . $e->getMessage());
+
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Order created successfully',
-                // 'data' => [
-                //     'sale_id' => $sale->id,
-                //     'invoice_number' => $sale->invoice_number,
-                //     'subtotal' => $sale->subtotal,
-                //     'product_discount' => $sale->discount_total,
-                //     'billed_discount' => $sale->billed_discount,
-                //     'grand_total' => $sale->grand_total,
-                // ],
 
                 'data'    => [
                     'sale_id'                   => $sale->id,
@@ -1365,30 +1405,57 @@ class posController extends Controller
             ], 422);
         }
 
-        $itemsFormatted = [];
-        $subtotal       = 0;
+        $itemsFormatted       = [];
+        $subtotal             = 0;
+        $productDiscountTotal = 0;
 
         foreach ($request->items as $item) {
+
+            // $variant = ProductVariantCombination::with('product')
+            //     ->findOrFail($item['variant_id']);
+
+            // $price            = $variant->extra_price;
+            // $product_discount = $variant->discount ?? 0;
+            // $qty              = $item['qty'];
+            // $lineTotal        = $price * $qty;
+
+            // $subtotal += $lineTotal;
+
+            // $itemsFormatted[] = [
+            //     'product_name' => $variant->product->name,
+            //     'variant_name' => $variant->sku,
+            //     'price'        => $price,
+            //     'discount'     => $product_discount,
+            //     'qty'          => $qty,
+            //     'total'        => $lineTotal,
+            // ];
 
             $variant = ProductVariantCombination::with('product')
                 ->findOrFail($item['variant_id']);
 
-            $price     = $variant->extra_price;
-            $qty       = $item['qty'];
-            $lineTotal = $price * $qty;
+            $price    = $variant->extra_price;
+            $discount = $variant->discount ?? 0;
+            $qty      = $item['qty'];
 
-            $subtotal += $lineTotal;
+            $lineTotal = ($price - $discount) * $qty;
+
+            $subtotal             += $price * $qty;
+            $productDiscountTotal += $discount * $qty;
 
             $itemsFormatted[] = [
                 'product_name' => $variant->product->name,
                 'variant_name' => $variant->sku,
                 'price'        => $price,
+                'discount'     => $discount,
                 'qty'          => $qty,
-                'total'        => $lineTotal,
+                'total'        => round($lineTotal, 2),
             ];
         }
 
-        $grandTotal = $subtotal;
+        // $grandTotal = $subtotal;
+        $taxTotal = $request->tax_total ?? 0;
+
+        $grandTotal = ($subtotal - $productDiscountTotal) + $taxTotal;
 
         /*
     |--------------------------------------------------------------------------
@@ -1396,19 +1463,34 @@ class posController extends Controller
     |--------------------------------------------------------------------------
     */
 
+        // $snapshot = [
+        //     'customer_name'  => $request->customer_name,
+        //     'customer_phone' => $request->customer_phone,
+        //     'items'          => $itemsFormatted,
+        //     'subtotal'       => $subtotal,
+        //     'discount'       => 0,
+        //     'grand_total'    => $grandTotal,
+        // ];
+
         $snapshot = [
-            'customer_name'  => $request->customer_name,
-            'customer_phone' => $request->customer_phone,
-            'items'          => $itemsFormatted,
-            'subtotal'       => $subtotal,
-            'discount'       => 0,
-            'grand_total'    => $grandTotal,
+            'customer_name'    => $request->customer_name,
+            'customer_phone'   => $request->customer_phone,
+            'items'            => $itemsFormatted,
+
+            'subtotal'         => round($subtotal, 2),
+            'discount_total'   => round($productDiscountTotal, 2),
+
+            'tax_total'        => round($taxTotal, 2), // ✅ overall GST
+
+            'grand_total'      => round($grandTotal, 2),
+
+            'address_snapshot' => $request->address_snapshot ?? [],
         ];
 
         // Add address only if provided
-        if ($request->filled('address_snapshot')) {
-            $snapshot['address_snapshot'] = $request->address_snapshot;
-        }
+        // if ($request->filled('address_snapshot')) {
+        //     $snapshot['address_snapshot'] = $request->address_snapshot;
+        // }
 
         /*
     |--------------------------------------------------------------------------
@@ -1453,85 +1535,89 @@ class posController extends Controller
         ]);
     }
 
-    private function formatOrderMessage_w($snapshot, $otp)
-    {
-        $message  = "🧾 *Order Confirmation*\n\n";
-        $message .= "👤 Name: {$snapshot['customer_name']}\n";
-        $message .= "📱 Phone: {$snapshot['customer_phone']}\n\n";
-
-        $message .= "🛍 *Items:*\n";
-
-        foreach ($snapshot['items'] as $item) {
-            $message .= "- {$item['product_name']} ({$item['variant_name']})\n";
-            $message .= "  ₹{$item['price']} x {$item['qty']} = ₹{$item['total']}\n";
-        }
-
-        $message .= "\n💰 Subtotal: ₹{$snapshot['subtotal']}";
-        $message .= "\n🎯 Discount: ₹{$snapshot['discount']}";
-        $message .= "\n🧮 Total: ₹{$snapshot['grand_total']}\n\n";
-
-        $address = $snapshot['address_snapshot'];
-
-        $message .= "📍 *Delivery Address:*\n";
-        $message .= "{$address['address']}, {$address['city']}, {$address['state']} - {$address['pincode']}\n\n";
-
-        $message .= "🔐 Your OTP is: *{$otp}*\n";
-        $message .= "⏳ Valid for 5 minutes.";
-
-        return $message;
-    }
-
     private function formatOrderMessage($snapshot, $otp)
     {
-        $message = "🛒 *Order Summary*\n\n";
+        $message  = "🛒 *ORDER SUMMARY*\n";
+        $message .= "━━━━━━━━━━━━━━━\n";
 
-        $message .= "👤 Customer: " . $snapshot['customer_name'] . "\n";
-        $message .= "📞 Phone: " . $snapshot['customer_phone'] . "\n\n";
+        // Customer
+        $message .= "👤 *Customer*\n";
+        $message .= "{$snapshot['customer_name']}\n";
+        $message .= "📞 {$snapshot['customer_phone']}\n";
+        $message .= "━━━━━━━━━━━━━━━\n\n";
 
-        $message .= "*Items*\n";
+        // Items
+        $message .= "📦 *ITEM DETAILS*\n\n";
 
         foreach ($snapshot['items'] as $item) {
 
-            $message .= "• " . $item['product_name'];
-            $message .= " (" . $item['variant_name'] . ")";
-            $message .= " x " . $item['qty'];
-            $message .= " = ₹" . $item['total'] . "\n";
+            $message .= "🔸 *{$item['product_name']}*\n";
+
+            if (! empty($item['variant_name'])) {
+                $message .= "   {$item['variant_name']}\n";
+            }
+
+            $message .= "   Qty: {$item['qty']}\n";
+
+            // show discount if exists
+            if (! empty($item['discount']) && $item['discount'] > 0) {
+                $message .= "   Discount: ₹{$item['discount']}\n";
+            }
+
+            $message .= "   Total: ₹{$item['total']}\n\n";
         }
 
-        $message .= "\nSubtotal: ₹" . $snapshot['subtotal'];
-        $message .= "\nGrand Total: ₹" . $snapshot['grand_total'] . "\n";
+        // Bill Summary
+        $message .= "━━━━━━━━━━━━━━━\n";
+        $message .= "💰 *BILL SUMMARY*\n\n";
 
-        /*
-    |--------------------------------------------------------------------------
-    | Optional Address
-    |--------------------------------------------------------------------------
-    */
+        $message .= "Subtotal: ₹{$snapshot['subtotal']}\n";
 
-        $addr = $snapshot['address_snapshot'];
+        if (! empty($snapshot['discount_total']) && $snapshot['discount_total'] > 0) {
+            $message .= "Discount: -₹{$snapshot['discount_total']}\n";
+        }
+
+        if (! empty($snapshot['tax_total']) && $snapshot['tax_total'] > 0) {
+            $message .= "GST: ₹{$snapshot['tax_total']}\n";
+        }
+
+        $message .= "━━━━━━━━━━━━━━━\n";
+        $message .= "🧾 *TOTAL: ₹{$snapshot['grand_total']}*\n";
+        $message .= "━━━━━━━━━━━━━━━\n";
+
+        // Address (safe)
+        $addr = $snapshot['address_snapshot'] ?? [];
 
         if (! empty($addr)) {
 
-            $message .= "\n📍 *Delivery Address*\n";
+            $message .= "\n📍 *DELIVERY ADDRESS*\n";
 
             if (! empty($addr['address'])) {
-                $message .= $addr['address'] . "\n";
+                $message .= "{$addr['address']}\n";
             }
 
             if (! empty($addr['city'])) {
-                $message .= $addr['city'] . "\n";
+                $message .= "{$addr['city']}\n";
             }
 
             if (! empty($addr['state'])) {
-                $message .= $addr['state'] . "\n";
+                $message .= "{$addr['state']}\n";
             }
 
             if (! empty($addr['pincode'])) {
-                $message .= $addr['pincode'] . "\n";
+                $message .= "PIN: {$addr['pincode']}\n";
             }
         }
 
-        $message .= "\n🔐 *OTP*: " . $otp;
-        $message .= "\nValid for 5 minutes.";
+        // OTP
+        $message .= "\n━━━━━━━━━━━━━━━\n";
+        $message .= "🔐 *OTP*: {$otp}\n";
+        $message .= "⏳ Valid for 5 minutes\n";
+        $message .= "━━━━━━━━━━━━━━━\n";
+
+        // Footer
+        $message .= "\n🙏 Thank you for shopping\n";
+        $message .= "🌿 *Sri Devi Herbals*\n";
 
         return $message;
     }
@@ -1580,19 +1666,17 @@ class posController extends Controller
         ]);
     }
 
-    public function manualOrders_old()
-    {
-        $orders = Sale::with([
-            'customer:id,name,phone', // 👈 only these fields
-        ])
-            ->orderBy('id', 'desc')
-            ->get();
+    // public function
+    // {public manualOrders_old() $orders = Sale::with([
+    //     'customer:id,name,phone', // 👈 only these fields
+    // ])
+    //         ->orderBy('id', 'desc')
+    //         ->get();
 
-        return response()->json([
-            'success' => true,
-            'data'    => $orders,
-        ]);
-    }
+    //     return response()->json([
+    //         'success' => true,
+    //         'data'    => $orders,
+    //     ]);}
 
     public function manualOrders(Request $request)
     {
